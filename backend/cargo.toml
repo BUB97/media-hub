@@ -1,0 +1,6 @@
+[workspace]
+members=[
+    "media-wasm",
+    "media-server",
+]
+resolver = "3"
