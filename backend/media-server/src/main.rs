@@ -227,6 +227,6 @@ async fn main() {
     println!("  GET  /api/logs         - 查询日志记录");
     println!("  GET  /api/metrics      - 获取监控指标");
 
-    axum::serve(listener, app).await.unwrap();
     crate::log_with_storage!(info, "服务已启动");
+    axum::serve(listener, app).await.unwrap();
 }
