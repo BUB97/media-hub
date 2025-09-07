@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc -b && vite build && sudo cp -r /Users/tennis/Documents/code/rust/media-hub/frontend/dist/* /opt/homebrew/var/www/",
+    "config::nginx": "sudo cp ../nginx-media-hub.conf /opt/homebrew/etc/nginx/servers/",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.mjs,.cjs,.ts,.mts,.cts,.vue",
     "lint:fix": "eslint . --ext .js,.mjs,.cjs,.ts,.mts,.cts,.vue --fix",
@@ -13,8 +14,10 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "axios": "^1.11.0",
     "tailwindcss": "^4.1.13",
-    "vue": "^3.5.18"
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
