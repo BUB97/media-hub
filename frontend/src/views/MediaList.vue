@@ -217,10 +217,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { authUtils, authAPI, mediaAPI, type Media } from '../api'
-
-const router = useRouter()
 
 // 状态管理
 const mediaList = ref<Media[]>([])
@@ -330,7 +327,7 @@ const handleCreateMedia = async () => {
 
 // 编辑媒体
 const editMedia = (media: Media) => {
-  router.push(`/media/${media.id}`)
+  getApp().goTo(`/media/${media.id}`)
 }
 
 // 删除媒体
@@ -353,12 +350,11 @@ const handleLogout = async () => {
   try {
     await authAPI.logout()
     authUtils.clearAuthData()
-    router.push('/')
   } catch (error) {
     console.error('登出失败:', error)
     authUtils.clearAuthData()
-    router.push('/')
   }
+    getApp().goTo("/")
 }
 
 // 组件挂载时加载数据

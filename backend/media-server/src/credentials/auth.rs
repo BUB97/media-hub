@@ -1,11 +1,10 @@
 use axum::{
-    extract::{Request, State},
+    extract::{Request},
     http::{header::AUTHORIZATION, StatusCode},
     middleware::Next,
     response::Response,
 };
-// 移除 tower_cookies 依赖
-use crate::jwt::{verify_token, Claims};
+use crate::credentials::jwt::{verify_token};
 
 #[derive(Clone)]
 pub struct AuthUser {

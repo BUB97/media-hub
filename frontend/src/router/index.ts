@@ -9,6 +9,7 @@ const Dashboard = () => import('../views/Dashboard.vue')
 const MediaList = () => import('../views/MediaList.vue')
 const MediaDetail = () => import('../views/MediaDetail.vue')
 const Profile = () => import('../views/Profile.vue')
+const UploadView = () => import('../views/UploadView.vue')
 
 const routes = [
   {
@@ -51,6 +52,12 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: Profile,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/upload',
+    name: 'Upload',
+    component: UploadView,
     meta: { requiresAuth: true },
   },
   {

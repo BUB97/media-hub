@@ -72,10 +72,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { authAPI, authUtils } from '../api'
-
-const router = useRouter()
 
 // 表单数据
 const form = ref({
@@ -107,7 +104,7 @@ const handleLogin = async () => {
     authUtils.saveAuthData(response)
 
     // 跳转到仪表板
-    router.push('/dashboard')
+    getApp().goTo('/dashboard', true)
   } catch (err: any) {
     console.error('登录失败:', err)
     if (err.response?.status === 401) {

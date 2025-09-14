@@ -1,0 +1,1 @@
+use std::env; fn main() { println!("COS_SECRET_ID: {}", env::var("COS_SECRET_ID").unwrap_or("未找到".to_string())); println!("COS_SECRET_KEY: {}", env::var("COS_SECRET_KEY").unwrap_or("未找到".to_string())); println!("COS_REGION: {}", env::var("COS_REGION").unwrap_or("未找到".to_string())); println!("COS_BUCKET: {}", env::var("COS_BUCKET").unwrap_or("未找到".to_string())); }

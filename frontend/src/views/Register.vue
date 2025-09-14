@@ -100,10 +100,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { authAPI } from '../api'
-
-const router = useRouter()
 
 // 表单数据
 const form = ref({
@@ -173,7 +170,7 @@ const handleRegister = async () => {
     
     // 延迟跳转以显示成功消息
     setTimeout(() => {
-      router.push('/login')
+      getApp().goTo('/login')
     }, 1500)
   } catch (err: any) {
     console.error('注册失败:', err)

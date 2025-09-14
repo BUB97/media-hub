@@ -274,10 +274,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { authUtils, authAPI, mediaAPI, type User } from '../api'
-
-const router = useRouter()
 
 // 状态管理
 const user = ref<User | null>(null)
@@ -384,7 +381,7 @@ const handlePasswordChange = async () => {
     
     // 清除认证信息并跳转到登录页
     authUtils.clearAuthData()
-    router.push('/login')
+    getApp().goTo('/login')
   } catch (err: any) {
     console.error('修改密码失败:', err)
     passwordError.value = '修改密码失败，请稍后重试'
@@ -397,7 +394,7 @@ const handlePasswordChange = async () => {
 const clearLocalData = () => {
   if (confirm('确定要清除本地存储的认证信息吗？这将需要您重新登录。')) {
     authUtils.clearAuthData()
-    router.push('/login')
+    getApp().goTo('/login')
   }
 }
 
@@ -418,7 +415,7 @@ const handleDeleteAccount = async () => {
     
     alert('账户已删除')
     authUtils.clearAuthData()
-    router.push('/')
+    getApp().goTo('/')
   } catch (err: any) {
     console.error('删除账户失败:', err)
     alert('删除账户失败，请稍后重试')
@@ -432,13 +429,13 @@ const handleLogout = async () => {
   try {
     await authAPI.logout()
     authUtils.clearAuthData()
-    router.push('/')
   } catch (error) {
     console.error('登出失败:', error)
     authUtils.clearAuthData()
-    router.push('/')
   }
+    getApp().goTo("/")
 }
+
 
 // 组件挂载时加载数据
 onMounted(async () => {

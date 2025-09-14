@@ -422,12 +422,11 @@ const handleLogout = async () => {
   try {
     await authAPI.logout()
     authUtils.clearAuthData()
-    router.push('/')
   } catch (error) {
     console.error('登出失败:', error)
     authUtils.clearAuthData()
-    router.push('/')
   }
+    getApp().goTo("/")
 }
 
 // 组件挂载时加载数据

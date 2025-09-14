@@ -33,7 +33,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('token_expires_at')
       // Cookie 会由服务器端清除
       // 路由到登录页面
-      getApp().goTo({path: '/register', query: {a: 1}})
+      getApp().goTo({path: '/login', query: {a: 1}})
     }
     return Promise.reject(error)
   }

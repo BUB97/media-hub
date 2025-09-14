@@ -15,6 +15,12 @@
               媒体库
             </router-link>
             <router-link
+              to="/upload"
+              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              📁 上传文件
+            </router-link>
+            <router-link
               to="/profile"
               class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
@@ -226,10 +232,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { authUtils, authAPI, mediaAPI } from '../api'
-
-const router = useRouter()
 
 // 状态管理
 const user = ref(authUtils.getStoredUser())
@@ -259,12 +262,11 @@ const handleLogout = async () => {
   try {
     await authAPI.logout()
     authUtils.clearAuthData()
-    router.push('/')
   } catch (error) {
     console.error('登出失败:', error)
     authUtils.clearAuthData()
-    router.push('/')
   }
+    getApp().goTo("/")
 }
 
 // 组件挂载时加载数据
