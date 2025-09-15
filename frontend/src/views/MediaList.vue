@@ -1,28 +1,35 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- 导航栏 -->
-    <nav class="bg-white shadow">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- 现代化导航栏 -->
+    <nav class="bg-white/80 backdrop-blur-sm shadow-lg border-b border-white/20 sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <router-link to="/" class="text-xl font-bold text-gray-900">Media Hub</router-link>
+            <div class="flex items-center space-x-3">
+              <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+              </div>
+              <router-link to="/" class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Media Hub</router-link>
+            </div>
           </div>
           <div class="flex items-center space-x-4">
             <router-link
               to="/dashboard"
-              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
             >
               仪表板
             </router-link>
             <router-link
               to="/profile"
-              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
             >
               个人资料
             </router-link>
             <button
               @click="handleLogout"
-              class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"
+              class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               登出
             </button>
@@ -32,15 +39,21 @@
     </nav>
 
     <!-- 主要内容 -->
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
       <!-- 页面标题和操作 -->
       <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center">
-          <h1 class="text-2xl font-bold text-gray-900">媒体库</h1>
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">媒体库</h1>
+            <p class="mt-2 text-gray-600">管理和浏览您的所有媒体文件</p>
+          </div>
           <button
             @click="showCreateModal = true"
-            class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+            class="bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
           >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
             添加媒体
           </button>
         </div>
@@ -48,30 +61,82 @@
 
       <!-- 筛选器 -->
       <div class="px-4 py-4 sm:px-0">
-        <div class="bg-white shadow rounded-lg p-4">
-          <div class="flex flex-wrap gap-4 items-center">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">类型筛选</label>
-              <select
-                v-model="filter.mediaType"
-                @change="loadMediaList"
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              >
-                <option value="">所有类型</option>
-                <option value="video">视频</option>
-                <option value="audio">音频</option>
-                <option value="image">图片</option>
-              </select>
+        <div class="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-white/20 p-4 sm:p-6 mobile-card">
+          <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-end">
+            <div class="w-full lg:w-auto">
+              <label class="block text-sm font-semibold text-gray-700 mb-2 mobile-text-sm">类型筛选</label>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  @click="filter.mediaType = ''"
+                  :class="[
+                    'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 touch-target mobile-button mobile-text-sm',
+                    filter.mediaType === '' 
+                      ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  全部
+                </button>
+                <button
+                  @click="filter.mediaType = 'video'"
+                  :class="[
+                    'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center touch-target mobile-button mobile-text-sm',
+                    filter.mediaType === 'video' 
+                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                  视频
+                </button>
+                <button
+                  @click="filter.mediaType = 'audio'"
+                  :class="[
+                    'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center touch-target mobile-button mobile-text-sm',
+                    filter.mediaType === 'audio' 
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                  </svg>
+                  音频
+                </button>
+                <button
+                  @click="filter.mediaType = 'image'"
+                  :class="[
+                    'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center touch-target mobile-button mobile-text-sm',
+                    filter.mediaType === 'image' 
+                      ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  图片
+                </button>
+              </div>
             </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-700 mb-1">搜索</label>
-              <input
-                v-model="filter.search"
-                @input="debounceSearch"
-                type="text"
-                placeholder="搜索标题或描述..."
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
+            <div class="flex-1 w-full lg:w-auto">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">搜索</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+                <input
+                  v-model="filter.search"
+                  @input="debounceSearch"
+                  type="text"
+                  placeholder="搜索标题或描述..."
+                  class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm bg-white/50 backdrop-blur-sm"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -94,61 +159,100 @@
           </button>
         </div>
 
-        <div v-else-if="filteredMediaList.length === 0" class="text-center py-8">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">暂无媒体文件</h3>
-          <p class="mt-1 text-sm text-gray-500">开始添加一些媒体文件到您的库中。</p>
-          <div class="mt-6">
+        <div v-else-if="filteredMediaList.length === 0" class="text-center py-16">
+          <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-12 max-w-md mx-auto">
+            <div class="h-16 w-16 bg-gradient-to-r from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">暂无媒体文件</h3>
+            <p class="text-gray-600 mb-8">开始添加一些媒体文件到您的库中，让您的创作之旅开始吧！</p>
             <button
               @click="showCreateModal = true"
-              class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+              class="bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               添加第一个媒体文件
             </button>
           </div>
         </div>
 
-        <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mobile-padding">
           <div
-            v-for="media in filteredMediaList"
+            v-for="(media, index) in filteredMediaList"
             :key="media.id"
-            class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+            class="group bg-white/80 backdrop-blur-sm overflow-hidden shadow-lg rounded-2xl border border-white/20 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105 animate-scale-in hover-lift mobile-card touch-target"
+            :style="`animation-delay: ${index * 0.1}s; animation-fill-mode: both;`"
             @click="$router.push(`/media/${media.id}`)"
           >
-            <div class="p-6">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0">
-                    <component :is="getMediaIcon(media.media_type)" class="h-8 w-8 text-gray-400" />
-                  </div>
-                  <div class="ml-4">
-                    <h3 class="text-lg font-medium text-gray-900 truncate">{{ media.title }}</h3>
-                    <p class="text-sm text-gray-500">{{ getMediaTypeLabel(media.media_type) }}</p>
-                  </div>
+            <!-- 媒体预览区域 -->
+            <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div :class="getMediaIconBg(media.media_type)" class="h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg :class="getMediaIconColor(media.media_type)" class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path v-if="media.media_type === 'video'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    <path v-else-if="media.media_type === 'audio'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    <path v-else-if="media.media_type === 'image'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                  </svg>
                 </div>
+              </div>
+              <!-- 类型标签 -->
+              <div class="absolute top-4 left-4">
+                <span :class="getMediaTypeBadge(media.media_type)" class="px-3 py-1 rounded-full text-xs font-medium">
+                  {{ getMediaTypeLabel(media.media_type) }}
+                </span>
+              </div>
+              <!-- 操作按钮 -->
+              <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <div class="flex space-x-2">
                   <button
                     @click.stop="editMedia(media)"
-                    class="text-blue-600 hover:text-blue-800"
+                    class="bg-white/90 backdrop-blur-sm text-gray-700 hover:text-primary-600 p-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                   >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </button>
                   <button
                     @click.stop="deleteMedia(media)"
-                    class="text-red-600 hover:text-red-800"
+                    class="bg-white/90 backdrop-blur-sm text-gray-700 hover:text-red-600 p-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                   >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                   </button>
                 </div>
               </div>
-              <div class="mt-4">
-                <p class="text-sm text-gray-600 line-clamp-2">{{ media.description }}</p>
+            </div>
+            
+            <!-- 媒体信息区域 -->
+            <div class="p-6">
+              <div class="mb-3">
+                <h3 class="text-lg font-bold text-gray-900 truncate group-hover:text-primary-600 transition-colors duration-200">{{ media.title }}</h3>
+                <p class="text-sm text-gray-500 mt-1">{{ media.description || '暂无描述' }}</p>
+              </div>
+              
+              <!-- 媒体元数据 -->
+              <div class="flex items-center justify-between text-xs text-gray-500">
+                <div class="flex items-center space-x-4">
+                  <span class="flex items-center">
+                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    {{ formatDate(media.created_at) }}
+                  </span>
+                  <span v-if="media.file_size" class="flex items-center">
+                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ formatFileSize(media.file_size) }}
+                  </span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <div class="h-2 w-2 bg-green-400 rounded-full"></div>
+                  <span>可用</span>
+                </div>
               </div>
             </div>
           </div>
@@ -157,7 +261,7 @@
     </main>
 
     <!-- 创建媒体模态框 -->
-    <div v-if="showCreateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div v-if="showCreateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
           <h3 class="text-lg font-medium text-gray-900 text-center">添加新媒体</h3>
@@ -271,6 +375,53 @@ const getMediaTypeLabel = (type: string) => {
     image: '图片',
   }
   return labels[type as keyof typeof labels] || type
+}
+
+// 获取媒体图标背景
+const getMediaIconBg = (type: string) => {
+  const backgrounds = {
+    video: 'bg-gradient-to-r from-red-500 to-pink-500',
+    audio: 'bg-gradient-to-r from-purple-500 to-indigo-500',
+    image: 'bg-gradient-to-r from-green-500 to-teal-500',
+    document: 'bg-gradient-to-r from-blue-500 to-cyan-500'
+  }
+  return backgrounds[type as keyof typeof backgrounds] || 'bg-gradient-to-r from-gray-500 to-gray-600'
+}
+
+// 获取媒体图标颜色
+const getMediaIconColor = (type: string) => {
+  return 'text-white'
+}
+
+// 获取媒体类型徽章样式
+const getMediaTypeBadge = (type: string) => {
+  const badges = {
+    video: 'bg-red-100 text-red-800',
+    audio: 'bg-purple-100 text-purple-800',
+    image: 'bg-green-100 text-green-800',
+    document: 'bg-blue-100 text-blue-800'
+  }
+  return badges[type as keyof typeof badges] || 'bg-gray-100 text-gray-800'
+}
+
+// 格式化日期
+const formatDate = (dateString: string | undefined) => {
+  if (!dateString) return '未知时间'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+// 格式化文件大小
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 // 防抖搜索
