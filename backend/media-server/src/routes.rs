@@ -4,11 +4,13 @@ use axum::{
     Router,
 };
 
+use crate::database::Database;
+
 use crate::handlers::*;
 use crate::credentials::auth_middleware;
 
 /// 创建应用程序的所有路由
-pub fn create_routes() -> Router {
+pub fn create_routes() -> Router<Database> {
     // 公开路由 (不需要认证)
     let public_routes = Router::new()
         .route("/api/health", get(health))
@@ -48,11 +50,11 @@ pub fn create_routes() -> Router {
 /// 打印所有可用的API端点
 pub fn print_endpoints() {
     println!("📋 Available endpoints:");
-    println!("  GET  /health              - 健康检查");
-    println!("  POST /auth/register       - 用户注册");
-    println!("  POST /auth/login          - 用户登录");
-    println!("  GET  /auth/me             - 获取当前用户信息 (需要认证)");
-    println!("  POST /auth/logout         - 用户登出 (需要认证)");
+    println!("  GET  /api/health          - 健康检查");
+    println!("  POST /api/auth/register   - 用户注册");
+    println!("  POST /api/auth/login      - 用户登录");
+    println!("  GET  /api/auth/me         - 获取当前用户信息 (需要认证)");
+    println!("  POST /api/auth/logout     - 用户登出 (需要认证)");
     println!("  GET  /api/media           - 获取所有媒体 (需要认证)");
     println!("  POST /api/media           - 创建新媒体 (需要认证)");
     println!("  GET  /api/media/search    - 搜索媒体 (需要认证)");
