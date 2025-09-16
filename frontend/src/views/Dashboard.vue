@@ -1,42 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-    <!-- 现代化导航栏 -->
-    <nav class="bg-white/80 backdrop-blur-sm shadow-lg border-b border-white/20 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <div class="flex items-center space-x-3">
-              <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-              </div>
-              <router-link to="/" class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Media Hub</router-link>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <router-link
-              to="/media"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              媒体库
-            </router-link>
-            <router-link
-              to="/profile"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              个人资料
-            </router-link>
-            <button
-              @click="handleLogout"
-              class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              登出
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <!-- 统一导航栏 -->
+    <AppNavbar />
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
@@ -331,66 +296,57 @@
 </style>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { authUtils, authAPI, mediaAPI } from '../api'
+import { ref, onMounted } from 'vue';
+import { authUtils, mediaAPI } from '../api';
+import AppNavbar from '../components/AppNavbar.vue';
 
 // 状态管理
-const user = ref(authUtils.getStoredUser())
-const showUploadModal = ref(false)
+const user = ref(authUtils.getStoredUser());
+const showUploadModal = ref(false);
 const stats = ref({
-  totalMedia: 0,
-  videoCount: 0,
-  audioCount: 0,
-  imageCount: 0,
-})
+    totalMedia: 0,
+    videoCount: 0,
+    audioCount: 0,
+    imageCount: 0,
+});
 const recentActivities = ref([
-  {
-    description: '上传了新的视频文件',
-    details: 'sample_video.mp4',
-    time: '2小时前',
-    type: '上传'
-  },
-  {
-    description: '删除了图片文件',
-    details: 'old_image.jpg',
-    time: '1天前',
-    type: '删除'
-  },
-  {
-    description: '更新了个人资料',
-    details: '修改了用户名和头像',
-    time: '3天前',
-    type: '更新'
-  }
-])
+    {
+        description: '上传了新的视频文件',
+        details: 'sample_video.mp4',
+        time: '2小时前',
+        type: '上传'
+    },
+    {
+        description: '删除了图片文件',
+        details: 'old_image.jpg',
+        time: '1天前',
+        type: '删除'
+    },
+    {
+        description: '更新了个人资料',
+        details: '修改了用户名和头像',
+        time: '3天前',
+        type: '更新'
+    }
+]);
 
 // 加载统计数据
 const loadStats = async () => {
-  try {
-    const mediaList = await mediaAPI.getMediaList()
-    stats.value.totalMedia = mediaList.length
-    stats.value.videoCount = mediaList.filter(m => m.media_type === 'video').length
-    stats.value.audioCount = mediaList.filter(m => m.media_type === 'audio').length
-    stats.value.imageCount = mediaList.filter(m => m.media_type === 'image').length
-  } catch (error) {
-    console.error('加载统计数据失败:', error)
-  }
-}
+    try {
+        const mediaList = await mediaAPI.getMediaList();
+        stats.value.totalMedia = mediaList.total;
+        stats.value.videoCount = mediaList.items?.filter(m => m.media_type === 'video').length;
+        stats.value.audioCount = mediaList.items?.filter(m => m.media_type === 'audio').length;
+        stats.value.imageCount = mediaList.items?.filter(m => m.media_type === 'image').length;
+    } catch (error) {
+        console.error('加载统计数据失败:', error);
+    }
+};
 
-// 处理登出
-const handleLogout = async () => {
-  try {
-    await authAPI.logout()
-    authUtils.clearAuthData()
-  } catch (error) {
-    console.error('登出失败:', error)
-    authUtils.clearAuthData()
-  }
-    getApp().goTo("/")
-}
+
 
 // 组件挂载时加载数据
 onMounted(() => {
-  loadStats()
-})
+    loadStats();
+});
 </script>

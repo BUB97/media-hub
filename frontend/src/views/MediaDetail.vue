@@ -1,48 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-    <!-- 现代化导航栏 -->
-    <nav class="bg-white/80 backdrop-blur-sm shadow-lg border-b border-white/20 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <div class="flex items-center space-x-3">
-              <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                </svg>
-              </div>
-              <router-link to="/" class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Media Hub</router-link>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <router-link
-              to="/dashboard"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              仪表板
-            </router-link>
-            <router-link
-              to="/media"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              媒体库
-            </router-link>
-            <router-link
-              to="/profile"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              个人资料
-            </router-link>
-            <button
-              @click="handleLogout"
-              class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              登出
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <!-- 统一导航栏 -->
+    <AppNavbar />
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
@@ -158,10 +117,6 @@
                     <dt class="text-sm font-medium text-gray-600 mb-1">文件大小</dt>
                     <dd class="text-sm font-semibold text-gray-900">{{ formatFileSize(media.file_size) }}</dd>
                   </div>
-                  <div v-if="media.duration" class="bg-white/50 rounded-xl p-4">
-                    <dt class="text-sm font-medium text-gray-600 mb-1">时长</dt>
-                    <dd class="text-sm font-semibold text-gray-900">{{ formatDuration(media.duration) }}</dd>
-                  </div>
                   <div v-if="media.created_at" class="bg-white/50 rounded-xl p-4">
                     <dt class="text-sm font-medium text-gray-600 mb-1">创建时间</dt>
                     <dd class="text-sm font-semibold text-gray-900">{{ formatDate(media.created_at) }}</dd>
@@ -185,7 +140,7 @@
             </div>
           </div>
           <div class="px-8 py-6">
-            <div v-if="!media.file_path" class="text-center py-12">
+            <div v-if="!media.cos_url" class="text-center py-12">
               <div class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 mx-auto w-32 h-32 flex items-center justify-center mb-6">
                 <svg class="h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -219,12 +174,12 @@
                     </div>
                     <div>
                       <p class="text-lg font-semibold text-gray-900 mb-1">文件已上传</p>
-                      <p class="text-sm text-gray-600 bg-white/50 px-3 py-1 rounded-lg inline-block">{{ media.file_path }}</p>
+                      <p class="text-sm text-gray-600 bg-white/50 px-3 py-1 rounded-lg inline-block">{{ media.filename }}</p>
                     </div>
                   </div>
                   <div class="flex space-x-3">
                     <a
-                      :href="mediaAPI.getMediaDownloadUrl(media.id)"
+                      :href="mediaAPI.getMediaDownloadUrl(media)"
                       target="_blank"
                       class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl inline-flex items-center space-x-2"
                     >
@@ -339,190 +294,169 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { authUtils, authAPI, mediaAPI, type Media } from '../api'
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { mediaAPI, type Media } from '../api';
+import AppNavbar from '../components/AppNavbar.vue';
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 // 状态管理
-const media = ref<Media | null>(null)
-const loading = ref(false)
-const error = ref('')
-const showEditModal = ref(false)
-const updateLoading = ref(false)
-const uploadProgress = ref(0)
+const media = ref<Media | null>(null);
+const loading = ref(false);
+const error = ref('');
+const showEditModal = ref(false);
+const updateLoading = ref(false);
+const uploadProgress = ref(0);
 
 // 编辑表单
 const editForm = ref({
-  title: '',
-  description: '',
-})
+    title: '',
+    description: '',
+});
 
 // 获取媒体类型标签
 const getMediaTypeLabel = (type: string) => {
-  const labels = {
-    video: '视频',
-    audio: '音频',
-    image: '图片',
-  }
-  return labels[type as keyof typeof labels] || type
-}
+    const labels = {
+        video: '视频',
+        audio: '音频',
+        image: '图片',
+    };
+    return labels[type as keyof typeof labels] || type;
+};
 
 // 格式化文件大小
 const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-// 格式化时长
-const formatDuration = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = Math.floor(seconds % 60)
-  
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-  return `${minutes}:${secs.toString().padStart(2, '0')}`
-}
+    if (bytes === 0) { return '0 Bytes'; }
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 // 格式化日期
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('zh-CN')
-}
+    return new Date(dateString).toLocaleString('zh-CN');
+};
 
 // 获取接受的文件类型
 const getAcceptedFileTypes = (mediaType: string) => {
-  const types = {
-    video: 'video/*',
-    audio: 'audio/*',
-    image: 'image/*',
-  }
-  return types[mediaType as keyof typeof types] || '*/*'
-}
+    const types = {
+        video: 'video/*',
+        audio: 'audio/*',
+        image: 'image/*',
+    };
+    return types[mediaType as keyof typeof types] || '*/*';
+};
 
 // 加载媒体详情
 const loadMediaDetail = async () => {
-  const id = parseInt(route.params.id as string)
-  if (!id) {
-    error.value = '无效的媒体 ID'
-    return
-  }
+    const id = route.params.id as string;
+    if (!id) {
+        error.value = '无效的媒体 ID';
+        return;
+    }
 
-  loading.value = true
-  error.value = ''
+    loading.value = true;
+    error.value = '';
   
-  try {
-    media.value = await mediaAPI.getMediaById(id)
-    // 初始化编辑表单
-    editForm.value = {
-      title: media.value.title,
-      description: media.value.description || '',
+    try {
+        media.value = await mediaAPI.getMediaById(id);
+        // 初始化编辑表单
+        editForm.value = {
+            title: media.value.title,
+            description: media.value.description || '',
+        };
+    } catch (err: any) {
+        console.error('加载媒体详情失败:', err);
+        if (err.response?.status === 404) {
+            error.value = '媒体不存在';
+        } else {
+            error.value = '加载媒体详情失败，请稍后重试';
+        }
+    } finally {
+        loading.value = false;
     }
-  } catch (err: any) {
-    console.error('加载媒体详情失败:', err)
-    if (err.response?.status === 404) {
-      error.value = '媒体不存在'
-    } else {
-      error.value = '加载媒体详情失败，请稍后重试'
-    }
-  } finally {
-    loading.value = false
-  }
-}
+};
 
 // 处理文件选择
 const handleFileSelect = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file || !media.value) return
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file || !media.value) { return; }
 
-  uploadProgress.value = 0
+    uploadProgress.value = 0;
   
-  try {
-    const updatedMedia = await mediaAPI.uploadMediaFile(
-      media.value.id,
-      file,
-      (progress) => {
-        uploadProgress.value = progress
-      }
-    )
+    try {
+        const updatedMedia = await mediaAPI.uploadMediaFile(
+            media.value.id,
+            file,
+            (progress) => {
+                uploadProgress.value = progress;
+            }
+        );
     
-    media.value = updatedMedia
-    uploadProgress.value = 100
+        media.value = updatedMedia;
+        uploadProgress.value = 100;
     
-    // 重置进度条
-    setTimeout(() => {
-      uploadProgress.value = 0
-    }, 2000)
-  } catch (err: any) {
-    console.error('文件上传失败:', err)
-    alert('文件上传失败，请稍后重试')
-    uploadProgress.value = 0
-  }
+        // 重置进度条
+        setTimeout(() => {
+            uploadProgress.value = 0;
+        }, 2000);
+    } catch (err: any) {
+        console.error('文件上传失败:', err);
+        alert('文件上传失败，请稍后重试');
+        uploadProgress.value = 0;
+    }
   
-  // 清除文件输入
-  target.value = ''
-}
+    // 清除文件输入
+    target.value = '';
+};
 
 // 处理更新
 const handleUpdate = async () => {
-  if (!media.value) return
+    if (!media.value) { return; }
   
-  updateLoading.value = true
+    updateLoading.value = true;
   
-  try {
-    const updatedMedia = await mediaAPI.updateMedia(media.value.id, {
-      title: editForm.value.title,
-      description: editForm.value.description,
-    })
+    try {
+        const updatedMedia = await mediaAPI.updateMedia(media.value.id, {
+            title: editForm.value.title,
+            description: editForm.value.description,
+        });
     
-    media.value = updatedMedia
-    showEditModal.value = false
-  } catch (err: any) {
-    console.error('更新媒体失败:', err)
-    alert('更新媒体失败，请稍后重试')
-  } finally {
-    updateLoading.value = false
-  }
-}
+        media.value = updatedMedia;
+        showEditModal.value = false;
+    } catch (err: any) {
+        console.error('更新媒体失败:', err);
+        alert('更新媒体失败，请稍后重试');
+    } finally {
+        updateLoading.value = false;
+    }
+};
 
 // 处理删除
 const handleDelete = async () => {
-  if (!media.value) return
+    if (!media.value) { return; }
   
-  if (!confirm(`确定要删除 "${media.value.title}" 吗？`)) {
-    return
-  }
+    if (!confirm(`确定要删除 "${media.value.title}" 吗？`)) {
+        return;
+    }
   
-  try {
-    await mediaAPI.deleteMedia(media.value.id)
-    router.push('/media')
-  } catch (err: any) {
-    console.error('删除媒体失败:', err)
-    alert('删除媒体失败，请稍后重试')
-  }
-}
+    try {
+        await mediaAPI.deleteMedia(media.value.id);
+        router.push('/media');
+    } catch (err: any) {
+        console.error('删除媒体失败:', err);
+        alert('删除媒体失败，请稍后重试');
+    }
+};
 
-// 处理登出
-const handleLogout = async () => {
-  try {
-    await authAPI.logout()
-    authUtils.clearAuthData()
-  } catch (error) {
-    console.error('登出失败:', error)
-    authUtils.clearAuthData()
-  }
-    getApp().goTo("/")
-}
+
 
 // 组件挂载时加载数据
 onMounted(() => {
-  loadMediaDetail()
-})
+    loadMediaDetail();
+});
 </script>

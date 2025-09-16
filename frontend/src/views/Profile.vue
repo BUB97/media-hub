@@ -1,42 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 现代化导航栏 -->
-    <nav class="bg-white/80 backdrop-blur-sm shadow-lg border-b border-white/20 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <div class="flex items-center space-x-3">
-              <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-              </div>
-              <router-link to="/" class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Media Hub</router-link>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <router-link
-              to="/dashboard"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              仪表板
-            </router-link>
-            <router-link
-              to="/media"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              媒体库
-            </router-link>
-            <button
-              @click="handleLogout"
-              class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              登出
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <!-- 统一导航栏 -->
+    <AppNavbar />
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -280,177 +245,168 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { authUtils, authAPI, mediaAPI, type User } from '../api'
+import { ref, onMounted } from 'vue';
+import { authUtils, authAPI, mediaAPI, type User } from '../api';
+import AppNavbar from '../components/AppNavbar.vue';
 
 // 状态管理
-const user = ref<User | null>(null)
-const loading = ref(false)
-const error = ref('')
-const showPasswordModal = ref(false)
-const showDeleteModal = ref(false)
-const passwordLoading = ref(false)
-const deleteLoading = ref(false)
-const passwordError = ref('')
-const deleteConfirmText = ref('')
+const user = ref<User | null>(null);
+const loading = ref(false);
+const error = ref('');
+const showPasswordModal = ref(false);
+const showDeleteModal = ref(false);
+const passwordLoading = ref(false);
+const deleteLoading = ref(false);
+const passwordError = ref('');
+const deleteConfirmText = ref('');
 
 // 统计数据
 const stats = ref({
   totalMedia: 0,
   totalSize: 0,
   daysActive: 0,
-})
+});
 
 // 密码修改表单
 const passwordForm = ref({
   currentPassword: '',
   newPassword: '',
   confirmPassword: '',
-})
+});
 
 // 格式化日期
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('zh-CN')
-}
+  return new Date(dateString).toLocaleString('zh-CN');
+};
 
 // 格式化文件大小
 const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
+  if (bytes === 0) { return '0 Bytes'; }
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 // 加载用户信息
 const loadUserInfo = async () => {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = '';
   
   try {
-    user.value = await authAPI.getCurrentUser()
+    user.value = await authAPI.getCurrentUser();
     // 同时更新本地存储
     if (user.value) {
-      localStorage.setItem('user_info', JSON.stringify(user.value))
+      localStorage.setItem('user_info', JSON.stringify(user.value));
     }
   } catch (err: any) {
-    console.error('加载用户信息失败:', err)
-    error.value = '加载用户信息失败，请稍后重试'
+    console.error('加载用户信息失败:', err);
+    error.value = '加载用户信息失败，请稍后重试';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 加载统计数据
 const loadStats = async () => {
   try {
-    const mediaList = await mediaAPI.getMediaList()
-    stats.value.totalMedia = mediaList.length
-    stats.value.totalSize = mediaList.reduce((total, media) => total + (media.file_size || 0), 0)
+    const mediaList = await mediaAPI.getMediaList();
+    stats.value.totalMedia = mediaList.total;
+    stats.value.totalSize = mediaList.items?.reduce((total, media) => total + (media.file_size || 0), 0);
     
     // 计算活跃天数（从注册到现在）
     if (user.value) {
-      const createdAt = new Date(user.value.created_at)
-      const now = new Date()
-      const diffTime = Math.abs(now.getTime() - createdAt.getTime())
-      stats.value.daysActive = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      const createdAt = new Date(user.value.created_at);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - createdAt.getTime());
+      stats.value.daysActive = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
   } catch (error) {
-    console.error('加载统计数据失败:', error)
+    console.error('加载统计数据失败:', error);
   }
-}
+};
 
 // 修改密码
 const handlePasswordChange = async () => {
-  passwordError.value = ''
+  passwordError.value = '';
   
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    passwordError.value = '两次输入的新密码不一致'
-    return
+    passwordError.value = '两次输入的新密码不一致';
+    return;
   }
   
   if (passwordForm.value.newPassword.length < 6) {
-    passwordError.value = '新密码至少需要6个字符'
-    return
+    passwordError.value = '新密码至少需要6个字符';
+    return;
   }
   
-  passwordLoading.value = true
+  passwordLoading.value = true;
   
   try {
     // 这里应该调用修改密码的 API，但后端还没有实现
     // await authAPI.changePassword(passwordForm.value)
     
     // 模拟 API 调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    alert('密码修改成功！请重新登录。')
-    showPasswordModal.value = false
+    alert('密码修改成功！请重新登录。');
+    showPasswordModal.value = false;
     
     // 清除认证信息并跳转到登录页
-    authUtils.clearAuthData()
-    getApp().goTo('/login')
+    authUtils.clearAuthData();
+    getApp().goTo('/login');
   } catch (err: any) {
-    console.error('修改密码失败:', err)
-    passwordError.value = '修改密码失败，请稍后重试'
+    console.error('修改密码失败:', err);
+    passwordError.value = '修改密码失败，请稍后重试';
   } finally {
-    passwordLoading.value = false
+    passwordLoading.value = false;
   }
-}
+};
 
 // 清除本地数据
 const clearLocalData = () => {
   if (confirm('确定要清除本地存储的认证信息吗？这将需要您重新登录。')) {
-    authUtils.clearAuthData()
-    getApp().goTo('/login')
+    authUtils.clearAuthData();
+    getApp().goTo('/login');
   }
-}
+};
 
 // 删除账户
 const handleDeleteAccount = async () => {
   if (deleteConfirmText.value !== 'DELETE') {
-    return
+    return;
   }
   
-  deleteLoading.value = true
+  deleteLoading.value = true;
   
   try {
     // 这里应该调用删除账户的 API，但后端还没有实现
     // await authAPI.deleteAccount()
     
     // 模拟 API 调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    alert('账户已删除')
-    authUtils.clearAuthData()
-    getApp().goTo('/')
+    alert('账户已删除');
+    authUtils.clearAuthData();
+    getApp().goTo('/');
   } catch (err: any) {
-    console.error('删除账户失败:', err)
-    alert('删除账户失败，请稍后重试')
+    console.error('删除账户失败:', err);
+    alert('删除账户失败，请稍后重试');
   } finally {
-    deleteLoading.value = false
+    deleteLoading.value = false;
   }
-}
+};
 
-// 处理登出
-const handleLogout = async () => {
-  try {
-    await authAPI.logout()
-    authUtils.clearAuthData()
-  } catch (error) {
-    console.error('登出失败:', error)
-    authUtils.clearAuthData()
-  }
-    getApp().goTo("/")
-}
+
 
 
 // 组件挂载时加载数据
 onMounted(async () => {
   // 先从本地存储获取用户信息
-  user.value = authUtils.getStoredUser()
+  user.value = authUtils.getStoredUser();
   
   // 然后从服务器获取最新信息
-  await loadUserInfo()
-  await loadStats()
-})
+  await loadUserInfo();
+  await loadStats();
+});
 </script>

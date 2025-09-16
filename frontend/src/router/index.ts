@@ -1,15 +1,15 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { authUtils } from '../api/auth'
+import { createRouter, createWebHistory } from 'vue-router';
+import { authUtils } from '../api/auth';
 
 // 路由组件懒加载
-const Home = () => import('../views/Home.vue')
-const Login = () => import('../views/Login.vue')
-const Register = () => import('../views/Register.vue')
-const Dashboard = () => import('../views/Dashboard.vue')
-const MediaList = () => import('../views/MediaList.vue')
-const MediaDetail = () => import('../views/MediaDetail.vue')
-const Profile = () => import('../views/Profile.vue')
-const UploadView = () => import('../views/UploadView.vue')
+const Home = () => import('../views/Home.vue');
+const Login = () => import('../views/Login.vue');
+const Register = () => import('../views/Register.vue');
+const Dashboard = () => import('../views/Dashboard.vue');
+const MediaList = () => import('../views/MediaList.vue');
+const MediaDetail = () => import('../views/MediaDetail.vue');
+const Profile = () => import('../views/Profile.vue');
+const UploadView = () => import('../views/UploadView.vue');
 
 const routes = [
   {
@@ -65,30 +65,30 @@ const routes = [
     name: 'NotFound',
     redirect: '/',
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
+});
 
 // 路由守卫
 router.beforeEach((to, _from, next) => {
-  const isAuthenticated = authUtils.isAuthenticatedSync()
-  
+  const isAuthenticated = authUtils.isAuthenticatedSync();
+
   // 需要登录的页面
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: 'Login' })
-    return
+    next({ name: 'Login' });
+    return;
   }
-  
+
   // 只允许未登录用户访问的页面（如登录、注册）
   if (to.meta.requiresGuest && isAuthenticated) {
-    next({ name: 'Dashboard' })
-    return
+    next({ name: 'Dashboard' });
+    return;
   }
-  
-  next()
-})
 
-export default router
+  next();
+});
+
+export default router;

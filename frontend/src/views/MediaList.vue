@@ -1,42 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-    <!-- 现代化导航栏 -->
-    <nav class="bg-white/80 backdrop-blur-sm shadow-lg border-b border-white/20 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <div class="flex items-center space-x-3">
-              <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                </svg>
-              </div>
-              <router-link to="/" class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Media Hub</router-link>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <router-link
-              to="/dashboard"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              仪表板
-            </router-link>
-            <router-link
-              to="/profile"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
-            >
-              个人资料
-            </router-link>
-            <button
-              @click="handleLogout"
-              class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              登出
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <!-- 统一导航栏 -->
+    <AppNavbar />
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
@@ -67,7 +32,7 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2 mobile-text-sm">类型筛选</label>
               <div class="flex flex-wrap gap-2">
                 <button
-                  @click="filter.mediaType = ''"
+                  @click="filter.mediaType = ''; handleFilterChange()"
                   :class="[
                     'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 touch-target mobile-button mobile-text-sm',
                     filter.mediaType === '' 
@@ -78,7 +43,7 @@
                   全部
                 </button>
                 <button
-                  @click="filter.mediaType = 'video'"
+                  @click="filter.mediaType = 'video'; handleFilterChange()"
                   :class="[
                     'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center touch-target mobile-button mobile-text-sm',
                     filter.mediaType === 'video' 
@@ -92,7 +57,7 @@
                   视频
                 </button>
                 <button
-                  @click="filter.mediaType = 'audio'"
+                  @click="filter.mediaType = 'audio'; handleFilterChange()"
                   :class="[
                     'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center touch-target mobile-button mobile-text-sm',
                     filter.mediaType === 'audio' 
@@ -106,7 +71,7 @@
                   音频
                 </button>
                 <button
-                  @click="filter.mediaType = 'image'"
+                  @click="filter.mediaType = 'image'; handleFilterChange()"
                   :class="[
                     'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center touch-target mobile-button mobile-text-sm',
                     filter.mediaType === 'image' 
@@ -207,6 +172,14 @@
               <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <div class="flex space-x-2">
                   <button
+                    @click.stop="downloadMedia(media)"
+                    class="bg-white/90 backdrop-blur-sm text-gray-700 hover:text-green-600 p-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </button>
+                  <button
                     @click.stop="editMedia(media)"
                     class="bg-white/90 backdrop-blur-sm text-gray-700 hover:text-primary-600 p-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                   >
@@ -215,7 +188,7 @@
                     </svg>
                   </button>
                   <button
-                    @click.stop="deleteMedia(media)"
+                    @click.stop="deleteMedia(media, $event)"
                     class="bg-white/90 backdrop-blur-sm text-gray-700 hover:text-red-600 p-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,6 +226,52 @@
                   <div class="h-2 w-2 bg-green-400 rounded-full"></div>
                   <span>可用</span>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分页组件 -->
+        <div v-if="totalPages > 1" class="px-4 py-6 sm:px-0">
+          <div class="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-white/20 p-4 sm:p-6">
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-gray-700">
+                显示第 {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalCount) }} 条，共 {{ totalCount }} 条
+              </div>
+              <div class="flex items-center space-x-2">
+                <button
+                  @click="handlePageChange(currentPage - 1)"
+                  :disabled="currentPage === 1"
+                  class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  上一页
+                </button>
+                
+                <div class="flex items-center space-x-1">
+                  <template v-for="page in getPageNumbers()" :key="page">
+                     <button
+                       v-if="typeof page === 'number'"
+                       @click="handlePageChange(page)"
+                       :class="[
+                         'px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200',
+                         page === currentPage
+                           ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
+                           : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                       ]"
+                     >
+                       {{ page }}
+                     </button>
+                     <span v-else class="px-2 py-2 text-sm text-gray-500">{{ page }}</span>
+                   </template>
+                </div>
+                
+                <button
+                  @click="handlePageChange(currentPage + 1)"
+                  :disabled="currentPage === totalPages"
+                  class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  下一页
+                </button>
               </div>
             </div>
           </div>
@@ -320,52 +339,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { authUtils, authAPI, mediaAPI, type Media } from '../api'
+import { ref, computed, onMounted } from 'vue';
+import { mediaAPI, type Media, type MediaListResponse, type MediaQueryParams } from '../api';
+import AppNavbar from '../components/AppNavbar.vue';
 
 // 状态管理
-const mediaList = ref<Media[]>([])
-const loading = ref(false)
-const error = ref('')
-const showCreateModal = ref(false)
-const createLoading = ref(false)
+const mediaList = ref<Media[]>([]);
+const loading = ref(false);
+const error = ref('');
+const showCreateModal = ref(false);
+const createLoading = ref(false);
+const totalCount = ref(0);
+const currentPage = ref(1);
+const pageSize = ref(12);
 
 // 筛选器
 const filter = ref({
   mediaType: '',
   search: '',
-})
+});
 
 // 创建表单
 const createForm = ref({
   title: '',
   description: '',
   media_type: '' as 'video' | 'audio' | 'image' | '',
-})
+});
 
-// 计算属性 - 筛选后的媒体列表
+// 计算属性 - 筛选后的媒体列表（现在由后端处理筛选）
 const filteredMediaList = computed(() => {
-  let filtered = mediaList.value
+  return mediaList.value;
+});
 
-  if (filter.value.mediaType) {
-    filtered = filtered.filter(media => media.media_type === filter.value.mediaType)
-  }
-
-  if (filter.value.search) {
-    const searchTerm = filter.value.search.toLowerCase()
-    filtered = filtered.filter(media => 
-      media.title.toLowerCase().includes(searchTerm) ||
-      media.description.toLowerCase().includes(searchTerm)
-    )
-  }
-
-  return filtered
-})
+// 计算总页数
+const totalPages = computed(() => {
+  return Math.ceil(totalCount.value / pageSize.value);
+});
 
 // 获取媒体类型图标
-const getMediaIcon = (_type: string) => {
-  return 'svg' // 简化处理，实际应该返回对应的 SVG 组件
-}
+// const getMediaIcon = (_type: string) => {
+//   return 'svg'; // 简化处理，实际应该返回对应的 SVG 组件
+// };
 
 // 获取媒体类型标签
 const getMediaTypeLabel = (type: string) => {
@@ -373,9 +387,9 @@ const getMediaTypeLabel = (type: string) => {
     video: '视频',
     audio: '音频',
     image: '图片',
-  }
-  return labels[type as keyof typeof labels] || type
-}
+  };
+  return labels[type as keyof typeof labels] || type;
+};
 
 // 获取媒体图标背景
 const getMediaIconBg = (type: string) => {
@@ -384,14 +398,15 @@ const getMediaIconBg = (type: string) => {
     audio: 'bg-gradient-to-r from-purple-500 to-indigo-500',
     image: 'bg-gradient-to-r from-green-500 to-teal-500',
     document: 'bg-gradient-to-r from-blue-500 to-cyan-500'
-  }
-  return backgrounds[type as keyof typeof backgrounds] || 'bg-gradient-to-r from-gray-500 to-gray-600'
-}
+  };
+  return backgrounds[type as keyof typeof backgrounds] || 'bg-gradient-to-r from-gray-500 to-gray-600';
+};
 
 // 获取媒体图标颜色
 const getMediaIconColor = (type: string) => {
-  return 'text-white'
-}
+  console.log('type', type);
+  return 'text-white';
+};
 
 // 获取媒体类型徽章样式
 const getMediaTypeBadge = (type: string) => {
@@ -400,118 +415,189 @@ const getMediaTypeBadge = (type: string) => {
     audio: 'bg-purple-100 text-purple-800',
     image: 'bg-green-100 text-green-800',
     document: 'bg-blue-100 text-blue-800'
-  }
-  return badges[type as keyof typeof badges] || 'bg-gray-100 text-gray-800'
-}
+  };
+  return badges[type as keyof typeof badges] || 'bg-gray-100 text-gray-800';
+};
 
 // 格式化日期
 const formatDate = (dateString: string | undefined) => {
-  if (!dateString) return '未知时间'
-  const date = new Date(dateString)
+  if (!dateString) { return '未知时间'; }
+  const date = new Date(dateString);
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
-  })
-}
+  });
+};
 
 // 格式化文件大小
 const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
+  if (bytes === 0) { return '0 B'; }
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 // 防抖搜索
-let searchTimeout: number
+let searchTimeout: number;
 const debounceSearch = () => {
-  clearTimeout(searchTimeout)
+  clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
-    // 搜索逻辑已在计算属性中处理
-  }, 300)
-}
+    currentPage.value = 1; // 重置到第一页
+    loadMediaList();
+  }, 300);
+};
+
+// 筛选器变化处理
+const handleFilterChange = () => {
+  currentPage.value = 1; // 重置到第一页
+  loadMediaList();
+};
+
+// 分页处理
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  loadMediaList();
+};
+
+// 下载媒体文件
+const downloadMedia = async (media: Media) => {
+  try {
+    const downloadUrl = mediaAPI.getMediaDownloadUrl(media);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = media.title;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err: any) {
+    console.error('下载失败:', err);
+    alert('下载失败，请稍后重试');
+  }
+};
 
 // 加载媒体列表
 const loadMediaList = async () => {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = '';
   
   try {
-    mediaList.value = await mediaAPI.getMediaList()
+    const params: MediaQueryParams = {
+      page: currentPage.value,
+      per_page: pageSize.value,
+      media_type: filter.value.mediaType || undefined,
+      q: filter.value.search || undefined
+    };
+    
+    const response: MediaListResponse = await mediaAPI.getMediaList(params);
+    mediaList.value = response.items;
+    totalCount.value = response.total;
   } catch (err: any) {
-    console.error('加载媒体列表失败:', err)
-    error.value = '加载媒体列表失败，请稍后重试'
+    console.error('加载媒体列表失败:', err);
+    error.value = '加载媒体列表失败，请稍后重试';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 创建媒体
 const handleCreateMedia = async () => {
-  createLoading.value = true
+  createLoading.value = true;
   
   try {
-    const newMedia = await mediaAPI.createMedia({
-      title: createForm.value.title,
-      description: createForm.value.description,
-      media_type: createForm.value.media_type as 'video' | 'audio' | 'image',
-    })
-    
-    mediaList.value.unshift(newMedia)
-    showCreateModal.value = false
+    // 注意：这里需要实际的文件上传逻辑
+    // 暂时跳过创建，因为需要文件上传功能
+    alert('创建媒体功能需要文件上传，请使用上传页面');
+    showCreateModal.value = false;
     
     // 重置表单
     createForm.value = {
       title: '',
       description: '',
       media_type: '',
-    }
+    };
+    return;
   } catch (err: any) {
-    console.error('创建媒体失败:', err)
-    alert('创建媒体失败，请稍后重试')
+    console.error('创建媒体失败:', err);
+    alert('创建媒体失败，请稍后重试');
   } finally {
-    createLoading.value = false
+    createLoading.value = false;
   }
-}
+};
 
 // 编辑媒体
 const editMedia = (media: Media) => {
-  getApp().goTo(`/media/${media.id}`)
-}
+  // 使用 Vue Router 进行导航
+  getApp().goTo(`/media/${media.id}`);
+};
 
 // 删除媒体
-const deleteMedia = async (media: Media) => {
+const deleteMedia = async (media: Media, event: Event) => {
+  event.stopPropagation(); // 阻止事件冒泡
+  
   if (!confirm(`确定要删除 "${media.title}" 吗？`)) {
-    return
+    return;
   }
   
   try {
-    await mediaAPI.deleteMedia(media.id)
-    mediaList.value = mediaList.value.filter(m => m.id !== media.id)
+    await mediaAPI.deleteMedia(media.id);
+    // 重新加载当前页
+    loadMediaList();
   } catch (err: any) {
-    console.error('删除媒体失败:', err)
-    alert('删除媒体失败，请稍后重试')
+    console.error('删除媒体失败:', err);
+    alert('删除媒体失败，请稍后重试');
   }
-}
+};
 
-// 处理登出
-const handleLogout = async () => {
-  try {
-    await authAPI.logout()
-    authUtils.clearAuthData()
-  } catch (error) {
-    console.error('登出失败:', error)
-    authUtils.clearAuthData()
+
+
+// 获取分页页码数组
+const getPageNumbers = () => {
+  const pages = [];
+  const total = totalPages.value;
+  const current = currentPage.value;
+  
+  if (total <= 7) {
+    // 如果总页数小于等于7，显示所有页码
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+  } else {
+    // 总是显示第一页
+    pages.push(1);
+    
+    if (current <= 4) {
+      // 当前页在前面时
+      for (let i = 2; i <= 5; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(total);
+    } else if (current >= total - 3) {
+      // 当前页在后面时
+      pages.push('...');
+      for (let i = total - 4; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 当前页在中间时
+      pages.push('...');
+      for (let i = current - 1; i <= current + 1; i++) {
+        pages.push(i);
+      }
+      pages.push('...');
+      pages.push(total);
+    }
   }
-    getApp().goTo("/")
-}
+  
+  return pages;
+};
 
 // 组件挂载时加载数据
 onMounted(() => {
-  loadMediaList()
-})
+  loadMediaList();
+});
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 use axum::{
     middleware,
-    routing::{get, post},
+    routing::{get, post, put, delete},
     Router,
 };
 
@@ -24,6 +24,10 @@ pub fn create_routes() -> Router<Database> {
         .route("/api/media", get(get_media))
         .route("/api/media", post(create_media))
         .route("/api/media/search", get(search_media))
+        .route("/api/media/{id}", get(get_media_by_id))
+        .route("/api/media/{id}", put(update_media))
+        .route("/api/media/{id}", delete(delete_media))
+        .route("/api/media/{id}/upload", put(upload_media_file))
         .route("/api/logs", get(query_logs))
         .route("/api/metrics", get(metrics))
         .route("/api/cos/sts", get(get_sts_credentials))
@@ -55,9 +59,13 @@ pub fn print_endpoints() {
     println!("  POST /api/auth/login      - 用户登录");
     println!("  GET  /api/auth/me         - 获取当前用户信息 (需要认证)");
     println!("  POST /api/auth/logout     - 用户登出 (需要认证)");
-    println!("  GET  /api/media           - 获取所有媒体 (需要认证)");
+    println!("  GET  /api/media           - 获取用户媒体列表 (需要认证)");
     println!("  POST /api/media           - 创建新媒体 (需要认证)");
     println!("  GET  /api/media/search    - 搜索媒体 (需要认证)");
+    println!("  GET  /api/media/:id       - 获取单个媒体 (需要认证)");
+    println!("  PUT  /api/media/:id       - 更新媒体信息 (需要认证)");
+    println!("  DELETE /api/media/:id     - 删除媒体 (需要认证)");
+    println!("  PUT  /api/media/:id/upload - 上传媒体文件 (需要认证)");
     println!("  GET  /api/logs            - 查询日志记录 (需要认证)");
     println!("  GET  /api/metrics         - 获取监控指标 (需要认证)");
     println!("  GET  /api/cos/sts         - 获取COS STS临时凭证 (需要认证)");

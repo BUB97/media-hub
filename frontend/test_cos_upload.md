@@ -3,6 +3,7 @@
 ## 🧪 测试步骤
 
 ### 1. 准备工作
+
 - ✅ 后端服务器已启动 (http://localhost:8000)
 - ✅ 前端服务器已启动 (http://localhost:5173)
 - ✅ 腾讯云COS JS SDK已安装
@@ -26,6 +27,7 @@
 ### 3. 预期结果
 
 #### 成功场景
+
 - ✅ 文件验证通过
 - ✅ 成功获取STS临时凭证
 - ✅ COS上传器初始化成功
@@ -33,6 +35,7 @@
 - ✅ 上传完成后显示访问URL
 
 #### 可能的错误场景
+
 - ❌ "获取STS临时凭证失败" - 检查后端环境变量配置
 - ❌ "存储桶不存在" - 检查COS_BUCKET环境变量
 - ❌ "访问被拒绝" - 检查腾讯云API密钥权限
@@ -41,21 +44,24 @@
 ## 🔧 故障排除
 
 ### 检查后端配置
+
 ```bash
 # 检查环境变量
 echo $COS_SECRET_ID
-echo $COS_SECRET_KEY  
+echo $COS_SECRET_KEY
 echo $COS_REGION
 echo $COS_BUCKET
 ```
 
 ### 检查后端日志
+
 ```bash
 # 查看服务器日志
 tail -f /Users/tennis/Documents/code/rust/media-hub/backend/media-server/logs/media-server.log.*
 ```
 
 ### 检查前端控制台
+
 - 打开浏览器开发者工具
 - 查看Console标签页的错误信息
 - 查看Network标签页的API请求状态

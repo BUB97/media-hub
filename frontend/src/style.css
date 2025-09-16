@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   /* 现代化配色方案 */
@@ -12,29 +12,36 @@
   --primary-700: #1d4ed8;
   --primary-800: #1e40af;
   --primary-900: #1e3a8a;
-  
+
   /* 渐变色 */
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  
+
   /* 阴影 */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  
+
   /* 字体 */
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   line-height: 1.6;
   font-weight: 400;
-  
+
   /* 动画 */
   --transition-fast: 150ms ease-in-out;
   --transition-normal: 250ms ease-in-out;
   --transition-slow: 350ms ease-in-out;
-  
+
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -74,7 +81,9 @@ body {
   padding: 0;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color var(--transition-normal), color var(--transition-normal);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
 }
 
 /* 链接样式 */
@@ -288,7 +297,8 @@ a:hover {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -339,7 +349,9 @@ a:hover {
 
 .hover-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .hover-glow {
@@ -402,62 +414,62 @@ a:hover {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
   }
-  
+
   .card {
     margin: 0.5rem;
   }
-  
+
   .container {
     padding: 1rem;
   }
-  
+
   .grid {
     grid-template-columns: 1fr;
   }
-  
+
   /* 移动端动画优化 */
   .hover-lift:hover {
     transform: translateY(-2px);
   }
-  
+
   .animate-fade-in,
   .animate-slide-in-left,
   .animate-slide-in-right,
   .animate-scale-in {
     animation-duration: 0.4s;
   }
-  
+
   /* 移动端触摸优化 */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* 移动端间距调整 */
   .mobile-padding {
     padding: 1rem;
   }
-  
+
   .mobile-margin {
     margin: 0.5rem;
   }
-  
+
   /* 移动端文字大小 */
   .mobile-text-sm {
     font-size: 0.875rem;
   }
-  
+
   .mobile-text-base {
     font-size: 1rem;
   }
-  
+
   /* 移动端卡片优化 */
   .mobile-card {
     border-radius: 1rem;
     margin: 0.5rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
-  
+
   /* 移动端按钮优化 */
   .mobile-button {
     padding: 0.75rem 1.5rem;
@@ -465,7 +477,7 @@ a:hover {
     border-radius: 0.75rem;
     min-height: 44px;
   }
-  
+
   /* 移动端输入框优化 */
   .mobile-input {
     padding: 0.875rem;

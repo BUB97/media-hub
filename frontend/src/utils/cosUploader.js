@@ -1,12 +1,12 @@
-import COS from 'cos-js-sdk-v5'
+import COS from 'cos-js-sdk-v5';
 
 /**
  * 腾讯云COS上传工具类
  */
 export class COSUploader {
   constructor() {
-    this.cos = null
-    this.credentials = null
+    this.cos = null;
+    this.credentials = null;
   }
 
   /**
@@ -18,19 +18,19 @@ export class COSUploader {
    * @param {string} region - COS区域
    */
   init(credentials, region = 'ap-beijing') {
-    this.credentials = credentials
-    
+    this.credentials = credentials;
+
     this.cos = new COS({
       SecretId: credentials.tmpSecretId,
       SecretKey: credentials.tmpSecretKey,
       SecurityToken: credentials.sessionToken,
       // 可选配置
-      FileParallelLimit: 3,    // 控制文件上传并发数
-      ChunkParallelLimit: 8,   // 控制单个文件下分片上传并发数，在同园区上传可以设置较大的并发数
+      FileParallelLimit: 3, // 控制文件上传并发数
+      ChunkParallelLimit: 8, // 控制单个文件下分片上传并发数，在同园区上传可以设置较大的并发数
       ChunkSize: 1024 * 1024 * 8, // 控制分片大小，单位 B，在同园区上传可以设置较大的分片大小
-      Timeout: 60000,          // 超时时间
-      Region: region,          // 存储桶所在地域
-    })
+      Timeout: 60000, // 超时时间
+      Region: region, // 存储桶所在地域
+    });
   }
 
   /**
@@ -45,46 +45,49 @@ export class COSUploader {
    */
   async uploadFile({ file, bucket, key, region, onProgress }) {
     if (!this.cos) {
-      throw new Error('COS实例未初始化，请先调用init方法')
+      throw new Error('COS实例未初始化，请先调用init方法');
     }
 
     return new Promise((resolve, reject) => {
-      this.cos.uploadFile({
-        Bucket: bucket,
-        Region: region,
-        Key: key,
-        Body: file,
-        SliceSize: 1024 * 1024 * 5, // 大于5MB的文件使用分片上传
-        onProgress: (progressData) => {
-          if (onProgress) {
-            const percent = Math.round(progressData.percent * 100)
-            onProgress({
-              percent,
-              loaded: progressData.loaded,
-              total: progressData.total,
-              speed: progressData.speed
-            })
-          }
+      this.cos.uploadFile(
+        {
+          Bucket: bucket,
+          Region: region,
+          Key: key,
+          Body: file,
+          SliceSize: 1024 * 1024 * 5, // 大于5MB的文件使用分片上传
+          onProgress: (progressData) => {
+            if (onProgress) {
+              const percent = Math.round(progressData.percent * 100);
+              onProgress({
+                percent,
+                loaded: progressData.loaded,
+                total: progressData.total,
+                speed: progressData.speed,
+              });
+            }
+          },
+          onTaskReady: (taskId) => {
+            console.log('上传任务已准备:', taskId);
+          },
         },
-        onTaskReady: (taskId) => {
-          console.log('上传任务已准备:', taskId)
+        (err, data) => {
+          if (err) {
+            console.error('上传失败:', err);
+            reject(err);
+          } else {
+            console.log('上传成功:', data);
+            resolve({
+              location: data.Location,
+              bucket: data.Bucket,
+              key: data.Key,
+              etag: data.ETag,
+              url: `https://${data.Location}`,
+            });
+          }
         }
-      }, (err, data) => {
-        if (err) {
-          console.error('上传失败:', err)
-          reject(err)
-        } else {
-          console.log('上传成功:', data)
-          resolve({
-            location: data.Location,
-            bucket: data.Bucket,
-            key: data.Key,
-            etag: data.ETag,
-            url: `https://${data.Location}`
-          })
-        }
-      })
-    })
+      );
+    });
   }
 
   /**
@@ -98,7 +101,7 @@ export class COSUploader {
    */
   getObjectUrl({ bucket, key, region, expires = 3600 }) {
     if (!this.cos) {
-      throw new Error('COS实例未初始化，请先调用init方法')
+      throw new Error('COS实例未初始化，请先调用init方法');
     }
 
     return this.cos.getObjectUrl({
@@ -106,8 +109,8 @@ export class COSUploader {
       Region: region,
       Key: key,
       Expires: expires,
-      Sign: true
-    })
+      Sign: true,
+    });
   }
 
   /**
@@ -117,13 +120,13 @@ export class COSUploader {
    */
   needsRefresh(bufferTime = 300) {
     if (!this.credentials || !this.credentials.expiredTime) {
-      return true
+      return true;
     }
 
-    const now = Math.floor(Date.now() / 1000)
-    const expiredTime = new Date(this.credentials.expiredTime).getTime() / 1000
-    
-    return (expiredTime - now) < bufferTime
+    const now = Math.floor(Date.now() / 1000);
+    const expiredTime = new Date(this.credentials.expiredTime).getTime() / 1000;
+
+    return expiredTime - now < bufferTime;
   }
 
   /**
@@ -132,15 +135,15 @@ export class COSUploader {
   destroy() {
     if (this.cos) {
       // 取消所有正在进行的任务
-      this.cos.cancelTask()
-      this.cos = null
+      this.cos.cancelTask();
+      this.cos = null;
     }
-    this.credentials = null
+    this.credentials = null;
   }
 }
 
 // 创建单例实例
-export const cosUploader = new COSUploader()
+export const cosUploader = new COSUploader();
 
 // 默认导出
-export default cosUploader
+export default cosUploader;
