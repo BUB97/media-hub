@@ -5,11 +5,11 @@ use axum::{
     Json as AxumJson,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use crate::database::Database;
-use crate::credentials::{Claims, AuthUser};
+use crate::credentials::{AuthUser};
+use crate::handlers::cos_handlers;
 
 #[derive(Serialize, Deserialize, Debug, Clone, sqlx::FromRow)]
 pub struct MediaItem {
@@ -294,16 +294,37 @@ pub async fn delete_media(
     Extension(auth_user): Extension<AuthUser>,
     Path(media_id): Path<String>,
 ) -> Result<StatusCode, StatusCode> {
-    let now = Utc::now();
+    // 首先获取媒体项目信息，用于删除COS文件
+    let get_query = "SELECT * FROM media_files WHERE id = $1 AND user_id = $2 AND status = 'active'";
     
-    let query = r#"
-        UPDATE media_files 
-        SET status = 'deleted', updated_at = $1
-        WHERE id = $2 AND user_id = $3 AND status = 'active'
-    "#;
+    let media_item = match sqlx::query_as::<_, MediaItem>(get_query)
+        .bind(&media_id)
+        .bind(&auth_user.user_id)
+        .fetch_one(&db.pool)
+        .await
+    {
+        Ok(item) => item,
+        Err(sqlx::Error::RowNotFound) => return Err(StatusCode::NOT_FOUND),
+        Err(e) => {
+            eprintln!("Database error getting media for deletion: {}", e);
+            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    };
     
-    match sqlx::query(query)
-        .bind(&now)
+    // 从腾讯云COS删除文件
+    if let Err(e) = cos_handlers::delete_cos_file(&media_item.cos_key, &media_item.cos_bucket, &media_item.cos_region).await {
+        eprintln!("Failed to delete file from COS: {}", e);
+        // 注意：即使COS删除失败，我们仍然继续删除数据库记录
+        // 这样可以避免数据库中留下无效的记录
+        crate::log_with_storage!(warn, "COS文件删除失败，但继续删除数据库记录: {}", e);
+    } else {
+        crate::log_with_storage!(info, "成功从COS删除文件: {}", media_item.cos_key);
+    }
+    
+    // 从数据库硬删除记录
+    let delete_query = "DELETE FROM media_files WHERE id = $1 AND user_id = $2";
+    
+    match sqlx::query(delete_query)
         .bind(&media_id)
         .bind(&auth_user.user_id)
         .execute(&db.pool)
@@ -311,6 +332,7 @@ pub async fn delete_media(
     {
         Ok(result) => {
             if result.rows_affected() > 0 {
+                crate::log_with_storage!(info, "成功删除媒体项目: {}", media_id);
                 Ok(StatusCode::NO_CONTENT)
             } else {
                 Err(StatusCode::NOT_FOUND)

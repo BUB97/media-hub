@@ -5,7 +5,9 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 use cos_rust_sdk::sts::{StsClient, GetCredentialsRequest, Policy};
+use cos_rust_sdk::{Config, CosClient, ObjectClient};
 use std::collections::HashMap;
+use std::time::Duration;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct StsRequest {
@@ -277,4 +279,39 @@ fn sanitize_filename(filename: &str) -> String {
         .chars()
         .take(50) // 限制长度
         .collect()
+}
+
+/// 从腾讯云COS删除文件
+pub async fn delete_cos_file(cos_key: &str, bucket: &str, region: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // 从环境变量获取COS配置
+    let secret_id = std::env::var("COS_SECRET_ID")
+        .map_err(|_| "未找到环境变量 COS_SECRET_ID")?;
+    
+    let secret_key = std::env::var("COS_SECRET_KEY")
+        .map_err(|_| "未找到环境变量 COS_SECRET_KEY")?;
+    
+    // 创建COS配置
+    let config = Config::new(&secret_id, &secret_key, &region.to_string(), &bucket.to_string())
+        .with_timeout(Duration::from_secs(30));
+    
+    // 创建COS客户端
+    let cos_client = CosClient::new(config)?;
+    let object_client = ObjectClient::new(cos_client);
+    
+    // 删除对象
+    match object_client.delete_object(cos_key).await {
+        Ok(_) => {
+            crate::log_with_storage!(info, "成功从COS删除文件: {}", cos_key);
+            Ok(())
+        }
+        Err(e) => {
+            // 如果是404错误（文件不存在），也视为成功
+            if e.to_string().contains("404") || e.to_string().contains("NoSuchKey") {
+                crate::log_with_storage!(info, "COS文件不存在，视为删除成功: {}", cos_key);
+                Ok(())
+            } else {
+                Err(format!("COS删除失败: {}", e).into())
+            }
+        }
+    }
 }
