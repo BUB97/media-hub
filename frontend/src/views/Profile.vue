@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- 统一导航栏 -->
-    <AppNavbar />
+    <AppNavbar current-page="profile" />
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">

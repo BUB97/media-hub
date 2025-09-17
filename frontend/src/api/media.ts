@@ -1,4 +1,5 @@
 import apiClient from './client';
+import axios from 'axios';
 
 // 媒体接口类型定义
 export interface Media {
@@ -73,6 +74,104 @@ export const mediaAPI = {
     createMedia: async (data: CreateMediaRequest): Promise<Media> => {
         const response = await apiClient.post('/media', data);
         return response.data;
+    },
+
+    // 直接上传文件并创建媒体记录（一体化操作）
+    createMediaWithFile: async (
+        file: File,
+        title?: string,
+        description?: string,
+        onProgress?: (progress: number) => void
+    ): Promise<Media> => {
+        console.log('🚀 开始上传文件:', file.name, '大小:', file.size, '类型:', file.type);
+        
+        try {
+            // 1. 获取COS配置和STS凭证
+            console.log('📡 获取COS配置和STS凭证...');
+            const [cosConfig, stsCredentials] = await Promise.all([
+                mediaAPI.getCosConfig(),
+                mediaAPI.getStsCredentials()
+            ]);
+            console.log('✅ COS配置获取成功:', cosConfig);
+            console.log('✅ STS凭证获取成功');
+
+            // 2. 根据文件类型确定媒体类型
+            const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+            let mediaType: 'image' | 'video' | 'audio' | 'document' = 'document';
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension)) {
+                mediaType = 'image';
+            } else if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(fileExtension)) {
+                mediaType = 'video';
+            } else if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(fileExtension)) {
+                mediaType = 'audio';
+            }
+            console.log('📁 文件类型判断:', fileExtension, '->', mediaType);
+
+            // 3. 生成COS对象键
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substring(2, 8);
+            const cosKey = `${cosConfig.upload_prefix}${timestamp}_${randomStr}_${file.name}`;
+            console.log('🔑 生成COS对象键:', cosKey);
+
+            // 4. 准备FormData
+            const formData = new FormData();
+            formData.append('key', cosKey);
+            formData.append('policy', stsCredentials.policy);
+            formData.append('q-sign-algorithm', stsCredentials.qSignAlgorithm);
+            formData.append('q-ak', stsCredentials.qAk);
+            formData.append('q-key-time', stsCredentials.qKeyTime);
+            formData.append('q-signature', stsCredentials.qSignature);
+            formData.append('file', file);
+
+            // 5. 上传文件到COS
+            const uploadUrl = `https://${cosConfig.bucket}.cos.${cosConfig.region}.myqcloud.com/`;
+            console.log('☁️ 开始上传到COS:', uploadUrl);
+            
+            await axios.post(uploadUrl, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    if (progressEvent.total && onProgress) {
+                        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                        onProgress(progress);
+                    }
+                },
+                timeout: 300000, // 5分钟超时
+            });
+            console.log('✅ 文件上传到COS成功');
+
+            // 6. 创建媒体记录
+            const cosUrl = `http://${cosConfig.bucket}.cos.${cosConfig.region}.myqcloud.com/${cosKey}`;
+            console.log('🔗 生成的COS URL:', cosUrl);
+            
+            const mediaData: CreateMediaRequest = {
+                title: title || file.name,
+                description: description || `上传的${mediaType === 'image' ? '图片' : mediaType === 'video' ? '视频' : mediaType === 'audio' ? '音频' : '文档'}文件`,
+                filename: cosKey,
+                original_filename: file.name,
+                file_size: file.size,
+                content_type: file.type,
+                cos_key: cosKey,
+                cos_url: cosUrl,
+                cos_bucket: cosConfig.bucket,
+                cos_region: cosConfig.region,
+                media_type: mediaType,
+            };
+            
+            console.log('💾 准备创建媒体记录:', mediaData);
+            const response = await apiClient.post('/media', mediaData);
+            console.log('✅ 媒体记录创建成功:', response.data);
+            
+            return response.data;
+
+        } catch (error: any) {
+            console.error('❌ 文件上传并创建媒体记录失败:', error);
+            if (error.response) {
+                console.error('❌ 响应错误:', error.response.status, error.response.data);
+            }
+            throw error;
+        }
     },
 
     // 更新媒体信息
@@ -150,34 +249,19 @@ export const mediaAPI = {
       
             const uploadUrl = `https://${cosConfig.bucket}.cos.${cosConfig.region}.myqcloud.com/`;
       
-            // 使用XMLHttpRequest来支持进度回调
-            const uploadPromise = new Promise<void>((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-        
-                xhr.upload.addEventListener('progress', (event) => {
-                    if (event.lengthComputable && onProgress) {
-                        const progress = Math.round((event.loaded / event.total) * 100);
+            // 使用axios来支持进度回调
+            await axios.post(uploadUrl, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    if (progressEvent.total && onProgress) {
+                        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
                         onProgress(progress);
                     }
-                });
-        
-                xhr.addEventListener('load', () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve();
-                    } else {
-                        reject(new Error(`Upload failed with status ${xhr.status}`));
-                    }
-                });
-        
-                xhr.addEventListener('error', () => {
-                    reject(new Error('Upload failed'));
-                });
-        
-                xhr.open('POST', uploadUrl);
-                xhr.send(formData);
+                },
+                timeout: 300000, // 5分钟超时
             });
-      
-            await uploadPromise;
       
             // 5. 更新媒体记录
             const cosUrl = `https://${cosConfig.bucket}.cos.${cosConfig.region}.myqcloud.com/${cosKey}`;

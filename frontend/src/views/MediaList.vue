@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <!-- 统一导航栏 -->
-    <AppNavbar />
+    <AppNavbar current-page="media" />
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
@@ -13,8 +13,8 @@
             <p class="mt-2 text-gray-600">管理和浏览您的所有媒体文件</p>
           </div>
           <button
-            @click="showCreateModal = true"
-            class="bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
+            @click="$router.push('/upload')"
+            class="bg-blue-600 hover:from-primary-700 hover:to-secondary-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -36,7 +36,7 @@
                   :class="[
                     'px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 touch-target mobile-button mobile-text-sm',
                     filter.mediaType === '' 
-                      ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg' 
+                      ? 'bg-blue-600 text-white shadow-lg' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   ]"
                 >
@@ -134,7 +134,7 @@
             <h3 class="text-xl font-bold text-gray-900 mb-2">暂无媒体文件</h3>
             <p class="text-gray-600 mb-8">开始添加一些媒体文件到您的库中，让您的创作之旅开始吧！</p>
             <button
-              @click="showCreateModal = true"
+              @click="$router.push('/upload')"
               class="bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               添加第一个媒体文件
@@ -279,62 +279,7 @@
       </div>
     </main>
 
-    <!-- 创建媒体模态框 -->
-    <div v-if="showCreateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-          <h3 class="text-lg font-medium text-gray-900 text-center">添加新媒体</h3>
-          <form @submit.prevent="handleCreateMedia" class="mt-4 space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">标题</label>
-              <input
-                v-model="createForm.title"
-                type="text"
-                required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">描述</label>
-              <textarea
-                v-model="createForm.description"
-                rows="3"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              ></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">类型</label>
-              <select
-                v-model="createForm.media_type"
-                required
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              >
-                <option value="">选择类型</option>
-                <option value="video">视频</option>
-                <option value="audio">音频</option>
-                <option value="image">图片</option>
-              </select>
-            </div>
-            <div class="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                @click="showCreateModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                :disabled="createLoading"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-              >
-                {{ createLoading ? '创建中...' : '创建' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -347,8 +292,6 @@ import AppNavbar from '../components/AppNavbar.vue';
 const mediaList = ref<Media[]>([]);
 const loading = ref(false);
 const error = ref('');
-const showCreateModal = ref(false);
-const createLoading = ref(false);
 const totalCount = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(12);
@@ -359,7 +302,7 @@ const filter = ref({
   search: '',
 });
 
-// 创建表单
+// 创建表单（保留用于兼容性，但不再使用）
 const createForm = ref({
   title: '',
   description: '',
@@ -501,29 +444,18 @@ const loadMediaList = async () => {
   }
 };
 
-// 创建媒体
+// 创建媒体（保留原有函数但不再使用）
 const handleCreateMedia = async () => {
-  createLoading.value = true;
+  // 注意：这里需要实际的文件上传逻辑
+  // 暂时跳过创建，因为需要文件上传功能
+  alert('创建媒体功能需要文件上传，请使用上传页面');
   
-  try {
-    // 注意：这里需要实际的文件上传逻辑
-    // 暂时跳过创建，因为需要文件上传功能
-    alert('创建媒体功能需要文件上传，请使用上传页面');
-    showCreateModal.value = false;
-    
-    // 重置表单
-    createForm.value = {
-      title: '',
-      description: '',
-      media_type: '',
-    };
-    return;
-  } catch (err: any) {
-    console.error('创建媒体失败:', err);
-    alert('创建媒体失败，请稍后重试');
-  } finally {
-    createLoading.value = false;
-  }
+  // 重置表单
+  createForm.value = {
+    title: '',
+    description: '',
+    media_type: '',
+  };
 };
 
 // 编辑媒体

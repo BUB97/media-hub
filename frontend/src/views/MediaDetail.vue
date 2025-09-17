@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
     <!-- 统一导航栏 -->
-    <AppNavbar />
+    <AppNavbar current-page="media" />
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">

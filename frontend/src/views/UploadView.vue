@@ -255,19 +255,55 @@
         },
       });
 
-      // 5. 完成上传
+      // 5. 保存媒体信息到后台数据库
+      uploadStatus.value = '保存媒体信息...';
+      
+      // 确定媒体类型
+      let mediaType = 'document';
+      if (selectedFile.value.type.startsWith('image/')) {
+        mediaType = 'image';
+      } else if (selectedFile.value.type.startsWith('video/')) {
+        mediaType = 'video';
+      } else if (selectedFile.value.type.startsWith('audio/')) {
+        mediaType = 'audio';
+      }
+
+      // 创建媒体记录
+      const mediaData = {
+        title: selectedFile.value.name.replace(/\.[^/.]+$/, ''), // 移除文件扩展名作为标题
+        description: `通过上传页面上传的${mediaType}文件`,
+        filename: (uploadResult.key || validateResponse.data.suggested_key || selectedFile.value.name).split('/').pop() || selectedFile.value.name,
+        original_filename: selectedFile.value.name,
+        file_size: selectedFile.value.size,
+        content_type: selectedFile.value.type,
+        cos_key: uploadResult.key || validateResponse.data.suggested_key,
+        cos_url: uploadResult.url,
+        cos_bucket: cosConfig.value?.bucket || 'your-bucket-name',
+        cos_region: cosConfig.value?.region || 'ap-beijing',
+        media_type: mediaType,
+        metadata: {
+          upload_method: 'direct_upload',
+          upload_time: new Date().toISOString()
+        }
+      };
+
+      const savedMedia = await apiClient.post('/media', mediaData);
+      
+      // 6. 完成上传
       uploadProgress.value = 100;
       uploadStatus.value = '上传完成！';
 
       showStatus(
-        `🎉 文件上传成功！\n访问地址: ${uploadResult.url}\n存储路径: ${uploadResult.key}`,
+        `🎉 文件上传成功！\n媒体ID: ${savedMedia.data.id}\n访问地址: ${uploadResult.url}\n存储路径: ${uploadResult.key}`,
         'success'
       );
 
-      // 清理
+      // 清理并跳转到媒体库
       setTimeout(() => {
         clearFile();
-        // isUploading.value = false;
+        isUploading.value = false;
+        // 跳转到媒体库页面
+        window.location.href = '/media';
       }, 3000);
     } catch (error) {
       console.error('上传失败:', error);

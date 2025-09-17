@@ -16,21 +16,21 @@
           <router-link
             v-if="showNavLinks"
             to="/dashboard"
-            class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
+            :class="getNavLinkClass('dashboard')"
           >
             仪表板
           </router-link>
           <router-link
             v-if="showNavLinks"
             to="/media"
-            class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
+            :class="getNavLinkClass('media')"
           >
             媒体库
           </router-link>
           <router-link
             v-if="showNavLinks"
             to="/profile"
-            class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 hover:bg-blue-50"
+            :class="getNavLinkClass('profile')"
           >
             个人资料
           </router-link>
@@ -64,20 +64,34 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { authAPI, authUtils } from '../api';
+import { computed } from 'vue';
 
 interface Props {
   showNavLinks?: boolean
   showLogout?: boolean
   showAuthLinks?: boolean
+  currentPage?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     showNavLinks: true,
     showLogout: true,
-    showAuthLinks: false
+    showAuthLinks: false,
+    currentPage: ''
 });
 
 const router = useRouter();
+
+// 计算导航链接的样式类
+const getNavLinkClass = (page: string) => {
+  const baseClass = "px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200";
+  const activeClass = "text-blue-600 bg-blue-50 border border-blue-200";
+  const inactiveClass = "text-gray-600 hover:text-blue-600 hover:bg-blue-50";
+  
+  return props.currentPage === page 
+    ? `${baseClass} ${activeClass}` 
+    : `${baseClass} ${inactiveClass}`;
+};
 
 const handleLogout = async () => {
     try {

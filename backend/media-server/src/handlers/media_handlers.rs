@@ -81,7 +81,7 @@ pub async fn get_media(
     let offset = (page - 1) * per_page;
     
     let mut query = "SELECT * FROM media_files WHERE user_id = $1 AND status = 'active'".to_string();
-    let mut query_params = vec![auth_user.user_id.clone()];
+    let mut query_params: Vec<String> = vec![auth_user.user_id.clone()];
     let mut param_count = 1;
     
     // 添加媒体类型过滤
@@ -94,19 +94,23 @@ pub async fn get_media(
     // 添加搜索过滤
     if let Some(search) = &params.q {
         param_count += 1;
+        let search_param = format!("%{}%", search);
         query.push_str(&format!(" AND (title ILIKE ${} OR description ILIKE ${})", param_count, param_count));
-        query_params.push(format!("%{}%", search));
+        query_params.push(search_param);
     }
     
     query.push_str(" ORDER BY created_at DESC");
     
-    // 获取总数
+    // 获取总数 - 构建相同的查询条件
     let count_query = query.replace("SELECT *", "SELECT COUNT(*)").replace(" ORDER BY created_at DESC", "");
-    let total: i64 = match sqlx::query_scalar(&count_query)
-        .bind(&auth_user.user_id)
-        .fetch_one(&db.pool)
-        .await
-    {
+    
+    // 为总数查询绑定所有参数
+    let mut count_query_builder = sqlx::query_scalar(&count_query);
+    for param in &query_params {
+        count_query_builder = count_query_builder.bind(param);
+    }
+    
+    let total: i64 = match count_query_builder.fetch_one(&db.pool).await {
         Ok(count) => count,
         Err(e) => {
             eprintln!("Database error getting media count: {}", e);
@@ -117,11 +121,13 @@ pub async fn get_media(
     // 添加分页
     query.push_str(&format!(" LIMIT {} OFFSET {}", per_page, offset));
     
-    let rows = match sqlx::query_as::<_, MediaItem>(&query)
-        .bind(&auth_user.user_id)
-        .fetch_all(&db.pool)
-        .await
-    {
+    // 为主查询绑定所有参数
+    let mut main_query_builder = sqlx::query_as::<_, MediaItem>(&query);
+    for param in &query_params {
+        main_query_builder = main_query_builder.bind(param);
+    }
+    
+    let rows = match main_query_builder.fetch_all(&db.pool).await {
         Ok(items) => items,
         Err(e) => {
             eprintln!("Database error getting media: {}", e);
@@ -143,6 +149,9 @@ pub async fn create_media(
     Extension(auth_user): Extension<AuthUser>,
     AxumJson(payload): AxumJson<CreateMediaRequest>,
 ) -> Result<Json<MediaItem>, StatusCode> {
+    println!("🚀 收到创建媒体请求 - 用户: {}, 标题: {}", auth_user.user_id, payload.title);
+    println!("📋 媒体数据: {:?}", payload);
+    
     let media_id = Uuid::new_v4().to_string();
     let now = Utc::now();
     
@@ -165,6 +174,8 @@ pub async fn create_media(
         created_at: now,
         updated_at: now,
     };
+    
+    println!("💾 准备插入数据库 - 媒体ID: {}", media_id);
     
     let query = r#"
         INSERT INTO media_files (
@@ -197,9 +208,12 @@ pub async fn create_media(
         .execute(&db.pool)
         .await
     {
-        Ok(_) => Ok(Json(media_item)),
+        Ok(result) => {
+            println!("✅ 媒体记录创建成功 - ID: {}, 影响行数: {}", media_id, result.rows_affected());
+            Ok(Json(media_item))
+        },
         Err(e) => {
-            eprintln!("Database error creating media: {}", e);
+            eprintln!("❌ 数据库错误 - 创建媒体失败: {}", e);
             Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
