@@ -1,5 +1,5 @@
 # 多阶段构建 - 构建阶段
-FROM rust:1.70-slim as builder
+FROM rust:1.87-slim as builder
 
 # 安装构建依赖
 RUN apt-get update && apt-get install -y \ 
@@ -73,4 +73,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1  
 
 # 启动命令
-CMD ["./media-server"]                  
+CMD ["./media-server"]

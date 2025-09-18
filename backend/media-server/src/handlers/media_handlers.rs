@@ -2,10 +2,10 @@ use crate::credentials::AuthUser;
 use crate::database::Database;
 use crate::handlers::cos_handlers;
 use axum::{
+    Json as AxumJson,
     extract::{Extension, Path, Query, State},
     http::StatusCode,
     response::Json,
-    Json as AxumJson,
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
