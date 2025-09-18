@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use tracing::instrument;
 use uuid::Uuid;
 
-use crate::logging::{LOG_STORAGE, LogEntry};
+use crate::logging::{LogEntry, LOG_STORAGE};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LogQueryParams {

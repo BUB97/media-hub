@@ -1,7 +1,7 @@
 use crate::credentials::jwt::verify_token;
 use axum::{
     extract::Request,
-    http::{StatusCode, header::AUTHORIZATION},
+    http::{header::AUTHORIZATION, StatusCode},
     middleware::Next,
     response::Response,
 };
