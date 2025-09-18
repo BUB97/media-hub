@@ -7,6 +7,7 @@
 //! - cos_handlers: 腾讯云COS相关处理函数（STS临时凭证、文件上传等）
 
 // 重新导出所有处理函数，保持向后兼容性
+pub mod ai_handlers;
 pub mod auth_handlers;
 pub mod media_handlers;
 pub mod system_handlers;

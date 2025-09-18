@@ -4,6 +4,7 @@ mod credentials;
 mod handlers;
 mod routes;
 mod database;
+mod ai_client;
 
 use logging::init_logging;
 use routes::{create_routes, print_endpoints};

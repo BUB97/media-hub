@@ -28,6 +28,13 @@ pub fn create_routes() -> Router<Database> {
         .route("/api/media/{id}", put(update_media))
         .route("/api/media/{id}", delete(delete_media))
         .route("/api/media/{id}/upload", put(upload_media_file))
+        // AI 分析相关路由
+        .route("/api/ai/analysis", post(ai_handlers::create_analysis))
+        .route("/api/ai/analysis/{id}", get(ai_handlers::get_analysis))
+        .route("/api/ai/analysis/{id}", delete(ai_handlers::delete_analysis))
+        .route("/api/ai/media/{media_id}/analyses", get(ai_handlers::get_media_analyses))
+        .route("/api/ai/search/similarity", post(ai_handlers::similarity_search))
+        .route("/api/ai/stats", get(ai_handlers::get_analysis_stats))
         .route("/api/logs", get(query_logs))
         .route("/api/metrics", get(metrics))
         .route("/api/cos/sts", get(get_sts_credentials))
@@ -66,6 +73,12 @@ pub fn print_endpoints() {
     println!("  PUT  /api/media/:id       - 更新媒体信息 (需要认证)");
     println!("  DELETE /api/media/:id     - 删除媒体 (需要认证)");
     println!("  PUT  /api/media/:id/upload - 上传媒体文件 (需要认证)");
+    println!("  POST /api/ai/analysis     - 创建AI分析任务 (需要认证)");
+    println!("  GET  /api/ai/analysis/:id - 获取AI分析结果 (需要认证)");
+    println!("  DELETE /api/ai/analysis/:id - 删除AI分析结果 (需要认证)");
+    println!("  GET  /api/ai/media/:media_id/analyses - 获取媒体的所有分析结果 (需要认证)");
+    println!("  POST /api/ai/search/similarity - 相似度搜索 (需要认证)");
+    println!("  GET  /api/ai/stats        - 获取AI分析统计信息 (需要认证)");
     println!("  GET  /api/logs            - 查询日志记录 (需要认证)");
     println!("  GET  /api/metrics         - 获取监控指标 (需要认证)");
     println!("  GET  /api/cos/sts         - 获取COS STS临时凭证 (需要认证)");
