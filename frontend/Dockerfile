@@ -7,8 +7,8 @@ WORKDIR /app
 # 复制 package 文件
 COPY frontend/package*.json ./
 
-# 安装依赖（跳过prepare脚本以避免husky问题）
-RUN npm ci --only=production --ignore-scripts
+# 安装所有依赖（包括devDependencies用于构建，跳过prepare脚本以避免husky问题）
+RUN npm ci --ignore-scripts
 
 # 复制源代码
 COPY frontend/ ./
