@@ -250,7 +250,7 @@ jobs:
         sleep 10
         
         # 测试健康检查端点
-        curl -f http://localhost:8000/health || exit 1
+        curl -f http://localhost:8000/api/health || exit 1
         
         # 清理：杀死后端进程
         kill $SERVER_PID
