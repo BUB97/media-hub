@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build && sudo cp -r /Users/tennis/Documents/code/rust/media-hub/frontend/dist/* /opt/homebrew/var/www/",
-    "config::nginx": "sudo cp ../nginx-media-hub.conf /opt/homebrew/etc/nginx/servers/ && sudo nginx -s reload",
+    "build": "vue-tsc -b && vite build",
+    "build:local": "vue-tsc -b && vite build && sudo cp -r /Users/tennis/Documents/code/rust/media-hub/frontend/dist/* /opt/homebrew/var/www/",
+    "config:nginx": "sudo cp ../nginx-media-hub.conf /opt/homebrew/etc/nginx/servers/ && sudo nginx -s reload",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.mjs,.cjs,.ts,.mts,.cts,.vue",
     "lint:fix": "eslint . --ext .js,.mjs,.cjs,.ts,.mts,.cts,.vue --fix",
