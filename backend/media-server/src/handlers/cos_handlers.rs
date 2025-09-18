@@ -137,7 +137,7 @@ pub async fn get_sts_credentials(
             
             let expiration_time = response.expired_time
                 .map(|t| chrono::DateTime::from_timestamp(t as i64, 0)
-                    .unwrap_or_else(|| chrono::Utc::now())
+                    .unwrap_or_else(chrono::Utc::now)
                     .to_rfc3339())
                 .unwrap_or_else(|| (chrono::Utc::now() + chrono::Duration::hours(1)).to_rfc3339());
             

@@ -79,7 +79,7 @@ export const authUtils = {
       // 尝试调用需要认证的接口来验证 Cookie
       await authAPI.getCurrentUser();
       return true;
-    } catch (error) {
+    } catch {
       // 如果请求失败，清除本地存储的用户信息
       authUtils.clearAuthData();
       return false;

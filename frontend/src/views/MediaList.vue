@@ -302,13 +302,6 @@ const filter = ref({
   search: '',
 });
 
-// 创建表单（保留用于兼容性，但不再使用）
-const createForm = ref({
-  title: '',
-  description: '',
-  media_type: '' as 'video' | 'audio' | 'image' | '',
-});
-
 // 计算属性 - 筛选后的媒体列表（现在由后端处理筛选）
 const filteredMediaList = computed(() => {
   return mediaList.value;
@@ -442,20 +435,6 @@ const loadMediaList = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-// 创建媒体（保留原有函数但不再使用）
-const handleCreateMedia = async () => {
-  // 注意：这里需要实际的文件上传逻辑
-  // 暂时跳过创建，因为需要文件上传功能
-  alert('创建媒体功能需要文件上传，请使用上传页面');
-  
-  // 重置表单
-  createForm.value = {
-    title: '',
-    description: '',
-    media_type: '',
-  };
 };
 
 // 编辑媒体
