@@ -79,11 +79,7 @@ jobs:
         env:                    # 容器环境变量
           POSTGRES_PASSWORD: postgres    # 数据库密码
           POSTGRES_DB: media_hub_test   # 测试数据库名
-        options: >-             # 容器启动选项
-          --health-cmd pg_isready       # 健康检查命令
-          --health-interval 10s         # 健康检查间隔
-          --health-timeout 5s           # 健康检查超时时间
-          --health-retries 5            # 健康检查重试次数
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5  # 健康检查配置
         ports:                  # 端口映射
           - 5432:5432          # 将容器5432端口映射到主机5432端口
     
@@ -210,11 +206,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: media_hub_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5  # 健康检查配置
         ports:
           - 5432:5432
     
