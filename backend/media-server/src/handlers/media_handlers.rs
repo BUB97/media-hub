@@ -1,15 +1,15 @@
+use crate::credentials::AuthUser;
+use crate::database::Database;
+use crate::handlers::cos_handlers;
 use axum::{
-    extract::{Query, State, Path, Extension},
+    Json as AxumJson,
+    extract::{Extension, Path, Query, State},
     http::StatusCode,
     response::Json,
-    Json as AxumJson,
 };
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::database::Database;
-use crate::credentials::{AuthUser};
-use crate::handlers::cos_handlers;
 
 #[derive(Serialize, Deserialize, Debug, Clone, sqlx::FromRow)]
 pub struct MediaItem {
@@ -79,37 +79,43 @@ pub async fn get_media(
     let page = params.page.unwrap_or(1).max(1);
     let per_page = params.per_page.unwrap_or(20).min(100).max(1);
     let offset = (page - 1) * per_page;
-    
-    let mut query = "SELECT * FROM media_files WHERE user_id = $1 AND status = 'active'".to_string();
+
+    let mut query =
+        "SELECT * FROM media_files WHERE user_id = $1 AND status = 'active'".to_string();
     let mut query_params: Vec<String> = vec![auth_user.user_id.clone()];
     let mut param_count = 1;
-    
+
     // 添加媒体类型过滤
     if let Some(media_type) = &params.media_type {
         param_count += 1;
         query.push_str(&format!(" AND media_type = ${}", param_count));
         query_params.push(media_type.clone());
     }
-    
+
     // 添加搜索过滤
     if let Some(search) = &params.q {
         param_count += 1;
         let search_param = format!("%{}%", search);
-        query.push_str(&format!(" AND (title ILIKE ${} OR description ILIKE ${})", param_count, param_count));
+        query.push_str(&format!(
+            " AND (title ILIKE ${} OR description ILIKE ${})",
+            param_count, param_count
+        ));
         query_params.push(search_param);
     }
-    
+
     query.push_str(" ORDER BY created_at DESC");
-    
+
     // 获取总数 - 构建相同的查询条件
-    let count_query = query.replace("SELECT *", "SELECT COUNT(*)").replace(" ORDER BY created_at DESC", "");
-    
+    let count_query = query
+        .replace("SELECT *", "SELECT COUNT(*)")
+        .replace(" ORDER BY created_at DESC", "");
+
     // 为总数查询绑定所有参数
     let mut count_query_builder = sqlx::query_scalar(&count_query);
     for param in &query_params {
         count_query_builder = count_query_builder.bind(param);
     }
-    
+
     let total: i64 = match count_query_builder.fetch_one(&db.pool).await {
         Ok(count) => count,
         Err(e) => {
@@ -117,16 +123,16 @@ pub async fn get_media(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
-    
+
     // 添加分页
     query.push_str(&format!(" LIMIT {} OFFSET {}", per_page, offset));
-    
+
     // 为主查询绑定所有参数
     let mut main_query_builder = sqlx::query_as::<_, MediaItem>(&query);
     for param in &query_params {
         main_query_builder = main_query_builder.bind(param);
     }
-    
+
     let rows = match main_query_builder.fetch_all(&db.pool).await {
         Ok(items) => items,
         Err(e) => {
@@ -134,7 +140,7 @@ pub async fn get_media(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
-    
+
     Ok(Json(MediaListResponse {
         items: rows,
         total,
@@ -149,12 +155,15 @@ pub async fn create_media(
     Extension(auth_user): Extension<AuthUser>,
     AxumJson(payload): AxumJson<CreateMediaRequest>,
 ) -> Result<Json<MediaItem>, StatusCode> {
-    println!("🚀 收到创建媒体请求 - 用户: {}, 标题: {}", auth_user.user_id, payload.title);
+    println!(
+        "🚀 收到创建媒体请求 - 用户: {}, 标题: {}",
+        auth_user.user_id, payload.title
+    );
     println!("📋 媒体数据: {:?}", payload);
-    
+
     let media_id = Uuid::new_v4().to_string();
     let now = Utc::now();
-    
+
     let media_item = MediaItem {
         id: media_id.clone(),
         user_id: auth_user.user_id.clone(),
@@ -174,9 +183,9 @@ pub async fn create_media(
         created_at: now,
         updated_at: now,
     };
-    
+
     println!("💾 准备插入数据库 - 媒体ID: {}", media_id);
-    
+
     let query = r#"
         INSERT INTO media_files (
             id, user_id, title, description, filename, original_filename,
@@ -186,7 +195,7 @@ pub async fn create_media(
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
         )
     "#;
-    
+
     match sqlx::query(query)
         .bind(&media_item.id)
         .bind(&media_item.user_id)
@@ -209,9 +218,13 @@ pub async fn create_media(
         .await
     {
         Ok(result) => {
-            println!("✅ 媒体记录创建成功 - ID: {}, 影响行数: {}", media_id, result.rows_affected());
+            println!(
+                "✅ 媒体记录创建成功 - ID: {}, 影响行数: {}",
+                media_id,
+                result.rows_affected()
+            );
             Ok(Json(media_item))
-        },
+        }
         Err(e) => {
             eprintln!("❌ 数据库错误 - 创建媒体失败: {}", e);
             Err(StatusCode::INTERNAL_SERVER_ERROR)
@@ -236,7 +249,7 @@ pub async fn get_media_by_id(
     Path(media_id): Path<String>,
 ) -> Result<Json<MediaItem>, StatusCode> {
     let query = "SELECT * FROM media_files WHERE id = $1 AND user_id = $2 AND status = 'active'";
-    
+
     match sqlx::query_as::<_, MediaItem>(query)
         .bind(&media_id)
         .bind(&auth_user.user_id)
@@ -260,7 +273,7 @@ pub async fn update_media(
     AxumJson(payload): AxumJson<UpdateMediaRequest>,
 ) -> Result<Json<MediaItem>, StatusCode> {
     let now = Utc::now();
-    
+
     let query = r#"
         UPDATE media_files 
         SET title = COALESCE($1, title),
@@ -269,7 +282,7 @@ pub async fn update_media(
         WHERE id = $4 AND user_id = $5 AND status = 'active'
         RETURNING *
     "#;
-    
+
     match sqlx::query_as::<_, MediaItem>(query)
         .bind(&payload.title)
         .bind(&payload.description)
@@ -295,8 +308,9 @@ pub async fn delete_media(
     Path(media_id): Path<String>,
 ) -> Result<StatusCode, StatusCode> {
     // 首先获取媒体项目信息，用于删除COS文件
-    let get_query = "SELECT * FROM media_files WHERE id = $1 AND user_id = $2 AND status = 'active'";
-    
+    let get_query =
+        "SELECT * FROM media_files WHERE id = $1 AND user_id = $2 AND status = 'active'";
+
     let media_item = match sqlx::query_as::<_, MediaItem>(get_query)
         .bind(&media_id)
         .bind(&auth_user.user_id)
@@ -310,9 +324,15 @@ pub async fn delete_media(
             return Err(StatusCode::INTERNAL_SERVER_ERROR);
         }
     };
-    
+
     // 从腾讯云COS删除文件
-    if let Err(e) = cos_handlers::delete_cos_file(&media_item.cos_key, &media_item.cos_bucket, &media_item.cos_region).await {
+    if let Err(e) = cos_handlers::delete_cos_file(
+        &media_item.cos_key,
+        &media_item.cos_bucket,
+        &media_item.cos_region,
+    )
+    .await
+    {
         eprintln!("Failed to delete file from COS: {}", e);
         // 注意：即使COS删除失败，我们仍然继续删除数据库记录
         // 这样可以避免数据库中留下无效的记录
@@ -320,10 +340,10 @@ pub async fn delete_media(
     } else {
         crate::log_with_storage!(info, "成功从COS删除文件: {}", media_item.cos_key);
     }
-    
+
     // 从数据库硬删除记录
     let delete_query = "DELETE FROM media_files WHERE id = $1 AND user_id = $2";
-    
+
     match sqlx::query(delete_query)
         .bind(&media_id)
         .bind(&auth_user.user_id)
@@ -366,7 +386,7 @@ pub async fn upload_media_file(
     AxumJson(payload): AxumJson<UploadMediaRequest>,
 ) -> Result<Json<MediaItem>, StatusCode> {
     let now = Utc::now();
-    
+
     let query = r#"
         UPDATE media_files 
         SET filename = $1,
@@ -382,7 +402,7 @@ pub async fn upload_media_file(
         WHERE id = $11 AND user_id = $12 AND status = 'active'
         RETURNING *
     "#;
-    
+
     match sqlx::query_as::<_, MediaItem>(query)
         .bind(&payload.filename)
         .bind(&payload.original_filename)

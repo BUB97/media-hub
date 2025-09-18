@@ -1,13 +1,12 @@
 use axum::{
-    middleware,
-    routing::{get, post, put, delete},
-    Router,
+    Router, middleware,
+    routing::{delete, get, post, put},
 };
 
 use crate::database::Database;
 
-use crate::handlers::*;
 use crate::credentials::auth_middleware;
+use crate::handlers::*;
 
 /// 创建应用程序的所有路由
 pub fn create_routes() -> Router<Database> {
@@ -16,7 +15,7 @@ pub fn create_routes() -> Router<Database> {
         .route("/api/health", get(health))
         .route("/api/auth/register", post(register))
         .route("/api/auth/login", post(login));
-    
+
     // 需要认证的路由
     let protected_routes = Router::new()
         .route("/api/auth/me", get(me))
@@ -34,21 +33,19 @@ pub fn create_routes() -> Router<Database> {
         .route("/api/cos/config", get(get_cos_config))
         .route("/api/cos/validate", post(validate_file_upload))
         .layer(middleware::from_fn(auth_middleware));
-    
-    Router::new()
-        .merge(public_routes)
-        .merge(protected_routes)
-        // 配置 CORS 以支持 Cookie 认证
-        // .layer(CorsLayer::new()
-        //         .allow_origin("http://localhost".parse::<axum::http::HeaderValue>().unwrap())
-        //         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
-        //         .allow_headers([
-        //             HeaderName::from_static("content-type"),
-        //             HeaderName::from_static("authorization"),
-        //             HeaderName::from_static("accept"),
-        //         ])
-        //         .allow_credentials(true)
-        // )
+
+    Router::new().merge(public_routes).merge(protected_routes)
+    // 配置 CORS 以支持 Cookie 认证
+    // .layer(CorsLayer::new()
+    //         .allow_origin("http://localhost".parse::<axum::http::HeaderValue>().unwrap())
+    //         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+    //         .allow_headers([
+    //             HeaderName::from_static("content-type"),
+    //             HeaderName::from_static("authorization"),
+    //             HeaderName::from_static("accept"),
+    //         ])
+    //         .allow_credentials(true)
+    // )
 }
 
 /// 打印所有可用的API端点

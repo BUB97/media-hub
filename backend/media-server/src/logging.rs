@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use tokio::sync::RwLock;
 use tracing::info;
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
-use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 use uuid::Uuid;
 
 // 全局日志存储
@@ -25,12 +25,8 @@ pub struct LogEntry {
 // 初始化日志系统
 pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
     // 创建文件输出器，按天轮转
-    let file_appender = RollingFileAppender::new(
-        Rotation::DAILY,
-        "logs",
-        "media-server.log",
-    );
-    
+    let file_appender = RollingFileAppender::new(Rotation::DAILY, "logs", "media-server.log");
+
     // 创建 JSON 格式的文件层
     let file_layer = fmt::layer()
         .json()
@@ -38,25 +34,24 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         .with_target(true)
         .with_thread_ids(true)
         .with_thread_names(true);
-    
+
     // 创建控制台输出层
     let console_layer = fmt::layer()
         .pretty()
         .with_target(true)
         .with_thread_ids(true)
         .with_thread_names(true);
-    
+
     // 环境过滤器 - 默认显示所有级别的日志
-    let env_filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("trace"));
-    
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("trace"));
+
     // 组合所有层
     tracing_subscriber::registry()
         .with(env_filter)
         .with(file_layer)
         .with(console_layer)
         .init();
-    
+
     info!("日志系统初始化完成");
     Ok(())
 }
@@ -78,10 +73,10 @@ pub async fn store_log_entry(
         module: "media_server".to_string(),
         fields: HashMap::new(),
     };
-    
+
     let mut storage = LOG_STORAGE.write().await;
     storage.push(entry);
-    
+
     // 保持最近 1000 条日志
     let len = storage.len();
     if len > 1000 {

@@ -1,10 +1,10 @@
+use crate::credentials::jwt::verify_token;
 use axum::{
-    extract::{Request},
-    http::{header::AUTHORIZATION, StatusCode},
+    extract::Request,
+    http::{StatusCode, header::AUTHORIZATION},
     middleware::Next,
     response::Response,
 };
-use crate::credentials::jwt::{verify_token};
 
 #[derive(Clone)]
 pub struct AuthUser {
@@ -12,10 +12,7 @@ pub struct AuthUser {
     pub username: String,
 }
 
-pub async fn auth_middleware(
-    mut request: Request,
-    next: Next,
-) -> Result<Response, StatusCode> {
+pub async fn auth_middleware(mut request: Request, next: Next) -> Result<Response, StatusCode> {
     // 首先尝试从Cookie中获取token
     let token = if let Some(cookie_header) = request.headers().get("cookie") {
         if let Ok(cookie_str) = cookie_header.to_str() {
@@ -30,7 +27,7 @@ pub async fn auth_middleware(
                     }
                 }
             }
-            
+
             if let Some(token) = auth_token {
                 token
             } else {
@@ -40,7 +37,7 @@ pub async fn auth_middleware(
                     .get(AUTHORIZATION)
                     .and_then(|header| header.to_str().ok())
                     .and_then(|header| header.strip_prefix("Bearer "));
-                
+
                 match auth_header {
                     Some(token) => token,
                     None => return Err(StatusCode::UNAUTHORIZED),
@@ -56,23 +53,23 @@ pub async fn auth_middleware(
             .get(AUTHORIZATION)
             .and_then(|header| header.to_str().ok())
             .and_then(|header| header.strip_prefix("Bearer "));
-        
+
         match auth_header {
             Some(token) => token,
             None => return Err(StatusCode::UNAUTHORIZED),
         }
     };
-    
+
     let claims = match verify_token(token) {
         Ok(token_data) => token_data.claims,
         Err(_) => return Err(StatusCode::UNAUTHORIZED),
     };
-    
+
     let auth_user = AuthUser {
         user_id: claims.sub,
         username: claims.username,
     };
-    
+
     request.extensions_mut().insert(auth_user);
     Ok(next.run(request).await)
 }
