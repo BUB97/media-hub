@@ -1,6 +1,7 @@
 use axum::{
-    Router, middleware,
+    middleware,
     routing::{delete, get, post, put},
+    Router,
 };
 
 use crate::database::Database;
