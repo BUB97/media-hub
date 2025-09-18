@@ -13,8 +13,8 @@ on:
 # 全局环境变量，所有作业都可以访问
 env:
   CARGO_TERM_COLOR: always  # 让Rust编译器输出彩色信息，便于调试
-  NODE_VERSION: '18'        # 统一指定Node.js版本，确保环境一致性
-  RUST_VERSION: '1.70'      # 统一指定Rust版本，确保编译一致性
+  NODE_VERSION: '24.7'        # 统一指定Node.js版本，确保环境一致性
+  RUST_VERSION: '1.87'      # 统一指定Rust版本，确保编译一致性
 
 # 定义作业列表，每个作业在独立的虚拟机中运行
 jobs:
