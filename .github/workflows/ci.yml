@@ -345,7 +345,6 @@ jobs:
         host: ${{ secrets.DEPLOY_HOST }}     # 服务器地址（从Secrets获取）
         username: ${{ secrets.DEPLOY_USER }} # SSH用户名（从Secrets获取）
         key: ${{ secrets.DEPLOY_KEY }}       # SSH私钥（从Secrets获取）
-        envs: COS_SECRET_ID,COS_SECRET_KEY,COS_REGION,COS_BUCKET,JWT_SECRET
         env:
           COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
           COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
