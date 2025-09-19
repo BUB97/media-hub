@@ -332,6 +332,6 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY }}       # SSH私钥（从Secrets获取）
         script: |                            # 在服务器上执行的脚本
           cd /opt/media-hub                  # 进入部署目录
-          docker-compose pull               # 拉取最新镜像
-          docker-compose up -d --remove-orphans  # 启动服务，移除孤立容器
+          docker compose pull               # 拉取最新镜像
+          docker compose up -d --remove-orphans  # 启动服务，移除孤立容器
           docker system prune -f            # 清理未使用的Docker资源
