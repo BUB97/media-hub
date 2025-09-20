@@ -383,9 +383,10 @@ jobs:
         host: ${{ secrets.DEPLOY_HOST }}
         username: ${{ secrets.DEPLOY_USER }}
         key: ${{ secrets.DEPLOY_KEY }}
-        source: "frontend/nginx.conf"
-        target: "/opt/media-hub/"
+        source: "nginx.conf"
+        target: "/opt/media-hub/nginx.conf"
         overwrite: true
+      working-directory: ./frontend
     
     # 通过SSH部署到生产服务器
     - name: Deploy to server
