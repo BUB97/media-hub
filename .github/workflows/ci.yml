@@ -208,7 +208,7 @@ jobs:
     name: Integration Tests   # 作业名称
     runs-on: ubuntu-latest    # 运行环境
     needs: [frontend, backend]
-    if: ${{ always() && !contains(github.event.head_commit.message, '[skip-integration]') }}
+    if: ${{ (needs.frontend.result == 'success' && needs.backend.result == 'success') && !contains(github.event.head_commit.message, '[skip-integration]') }}
     
     # 集成测试需要的服务
     services:
