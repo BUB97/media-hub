@@ -435,4 +435,6 @@ jobs:
           ls -ld /opt/media-hub/nginx.conf
           docker compose pull
           docker compose up -d --remove-orphans
+          # 重新加载nginx配置，确保更新的nginx.conf生效
+          docker compose exec -T nginx nginx -s reload
           docker system prune -f
