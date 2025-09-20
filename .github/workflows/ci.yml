@@ -385,6 +385,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY }}
         source: "frontend/nginx.conf"
         target: "/opt/media-hub/"
+        overwrite: true
     
     # 通过SSH部署到生产服务器
     - name: Deploy to server
