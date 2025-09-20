@@ -41,7 +41,7 @@ services:
 
   # 后端服务
   backend:
-    image: media-hub/backend:latest
+    image: crpi-3r6u19jzxmn3y9aa.cn-beijing.personal.cr.aliyuncs.com/media-hub/backend:latest
     container_name: media-hub-backend
     restart: unless-stopped
     environment:
@@ -73,7 +73,7 @@ services:
 
   # 前端服务
   frontend:
-    image: media-hub/frontend:latest
+    image: crpi-3r6u19jzxmn3y9aa.cn-beijing.personal.cr.aliyuncs.com/media-hub/frontend:latest
     container_name: media-hub-frontend
     restart: unless-stopped
     ports:
