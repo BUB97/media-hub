@@ -57,7 +57,7 @@ jobs:
     name: Frontend Build & Test  # 作业的显示名称
     runs-on: ubuntu-latest       # 指定运行环境为最新版Ubuntu
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.ci == 'true' || github.event_name == 'pull_request' }}
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.ci == 'true' }}
     defaults:                    # 设置默认配置
       run:                       # 所有run步骤的默认设置
         working-directory: ./frontend  # 默认工作目录设为frontend文件夹
@@ -105,7 +105,7 @@ jobs:
     name: Backend Build & Test  # 作业显示名称
     runs-on: ubuntu-latest      # 运行环境
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.ci == 'true' || github.event_name == 'pull_request' }}
+    if: ${{ needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.ci == 'true' }}
     defaults:                   # 默认设置
       run:
         working-directory: ./backend  # 默认工作目录为backend
@@ -170,7 +170,7 @@ jobs:
     name: WASM Build           # 作业名称
     runs-on: ubuntu-latest     # 运行环境
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.wasm == 'true' || needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.ci == 'true' || github.event_name == 'pull_request' }}
+    if: ${{ needs.detect-changes.outputs.wasm == 'true' || needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.ci == 'true' }}
     defaults:
       run:
         working-directory: ./backend/media-wasm  # WASM项目目录
@@ -212,6 +212,8 @@ jobs:
   security:
     name: Security Scan       # 作业名称
     runs-on: ubuntu-latest    # 运行环境
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.wasm == 'true' || needs.detect-changes.outputs.ci == 'true' || github.event_name == 'pull_request' }}
     
     steps:
     - name: Checkout code
@@ -336,6 +338,7 @@ jobs:
     
     # 构建并推送后端Docker镜像
     - name: Build and push backend image
+      if: ${{ needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.ci == 'true' }}
       uses: docker/build-push-action@v5  # 使用官方Docker构建推送action
       with:
         context: .                        # 构建上下文为当前目录
@@ -351,6 +354,7 @@ jobs:
     
     # 构建并推送前端Docker镜像
     - name: Build and push frontend image
+      if: ${{ needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.ci == 'true' }}
       uses: docker/build-push-action@v5
       with:
         context: .
