@@ -375,36 +375,6 @@ jobs:
           mv .env.tmp .env
           chmod 600 .env
         
-          # 改进的Docker拉取策略：添加多次重试、超时设置和错误处理
-          echo "开始拉取Docker镜像..."
-          
-          # 定义重试次数和超时时间（秒）
-          MAX_RETRIES=3
-          RETRY_DELAY=10
-          TIMEOUT=300
-          
-          # 尝试拉取镜像，如果失败则重试
-          for i in $(seq 1 $MAX_RETRIES); do
-            echo "尝试第 $i 次拉取镜像..."
-            if docker compose pull --timeout $TIMEOUT; then
-              echo "镜像拉取成功！"
-              break
-            else
-              echo "第 $i 次镜像拉取失败！"
-              if [ $i -lt $MAX_RETRIES ]; then
-                echo "等待 $RETRY_DELAY 秒后重试..."
-                sleep $RETRY_DELAY
-              else
-                echo "已达到最大重试次数 ($MAX_RETRIES)，尝试使用本地已有镜像启动..."
-                break
-              fi
-            fi
-          done
-          
-          # 启动服务，即使拉取失败也尝试使用已有镜像
-          echo "启动Docker服务..."
+          docker compose pull
           docker compose up -d --remove-orphans
-          
-          # 清理未使用的资源
-          echo "清理Docker资源..."
           docker system prune -f
