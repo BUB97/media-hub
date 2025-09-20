@@ -23,7 +23,7 @@ services:
 
   # Redis 缓存
   redis:
-    image: redis:7-alpine
+    image: redis:6.2-alpine
     container_name: media-hub-redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
