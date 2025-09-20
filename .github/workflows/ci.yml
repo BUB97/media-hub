@@ -273,7 +273,7 @@ jobs:
     name: Build Docker Images     # 作业名称
     runs-on: ubuntu-latest        # 运行环境
     needs: [frontend, backend, wasm]
-    if: ${{ github.ref == 'refs/heads/main' && ((needs.frontend.result == 'success' || needs.frontend.result == 'skipped') && (needs.backend.result == 'success' || needs.backend.result == 'skipped') && (needs.wasm.result == 'success' || needs.wasm.result == 'skipped')) && !contains(github.event.head_commit.message, '[skip-docker]') }}
+    if: ${{ github.ref == 'refs/heads/main' && ((needs.frontend.result == 'success' || needs.backend.result == 'success' || needs.wasm.result == 'success')  && !contains(github.event.head_commit.message, '[skip-docker]') }}
     
     steps:
     - name: Checkout code
@@ -298,11 +298,29 @@ jobs:
         username: ${{ secrets.ALIYUN_DOCKER_USERNAME }}  # 从GitHub Secrets获取阿里云用户名
         password: ${{ secrets.ALIYUN_DOCKER_PASSWORD }}  # 从GitHub Secrets获取阿里云密码
     
-    # 下载所有构建产物
-    - name: Download artifacts
+    # 下载后端构建产物（仅当后端构建成功时）
+    - name: Download backend artifact
+      if: ${{ needs.backend.result == 'success' }}
       uses: actions/download-artifact@v4
       with:
-        path: ./artifacts  # 下载所有artifacts到artifacts目录
+        name: backend-binary
+        path: ./artifacts/backend
+        
+    # 下载前端构建产物（仅当前端构建成功时）
+    - name: Download frontend artifact
+      if: ${{ needs.frontend.result == 'success' }}
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-dist
+        path: ./artifacts/frontend
+        
+    # 下载WASM构建产物（仅当WASM构建成功时）
+    - name: Download wasm artifact
+      if: ${{ needs.wasm.result == 'success' }}
+      uses: actions/download-artifact@v4
+      with:
+        name: wasm-pkg
+        path: ./artifacts/wasm
     
     # 构建并推送后端Docker镜像
     - name: Build and push backend image
@@ -341,7 +359,7 @@ jobs:
     name: Deploy to Production       # 作业名称
     runs-on: ubuntu-latest           # 运行环境
     needs: [integration, docker]
-    if: ${{ always() && github.ref == 'refs/heads/main' && needs.integration.result == 'success' && (needs.docker.result == 'success' || needs.docker.result == 'skipped') && !contains(github.event.head_commit.message, '[skip-deploy]') }}
+    if: ${{ always() && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip-deploy]') }}
     environment: production          # 指定部署环境，可以设置保护规则
     
     steps:
