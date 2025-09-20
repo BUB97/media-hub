@@ -23,10 +23,41 @@ env:
 
 # 定义作业列表，每个作业在独立的虚拟机中运行
 jobs:
+  # 初始化作业：检测代码变更
+  detect-changes:
+    name: Detect Code Changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      wasm: ${{ steps.filter.outputs.wasm }}
+      ci: ${{ steps.filter.outputs.ci }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            frontend: 
+              - 'frontend/**'
+              - 'package.json'
+              - 'package-lock.json'
+            backend: 
+              - 'backend/**'
+              - 'Cargo.lock'
+            wasm: 
+              - 'backend/media-wasm/**'
+            ci: 
+              - '.github/workflows/**'
+              - 'scripts/**'
+              - '.dockerignore'
+  
   # 前端构建和测试作业
   frontend:
     name: Frontend Build & Test  # 作业的显示名称
     runs-on: ubuntu-latest       # 指定运行环境为最新版Ubuntu
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.ci == 'true' || github.event_name == 'pull_request' }}
     defaults:                    # 设置默认配置
       run:                       # 所有run步骤的默认设置
         working-directory: ./frontend  # 默认工作目录设为frontend文件夹
@@ -73,6 +104,8 @@ jobs:
   backend:
     name: Backend Build & Test  # 作业显示名称
     runs-on: ubuntu-latest      # 运行环境
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.ci == 'true' || github.event_name == 'pull_request' }}
     defaults:                   # 默认设置
       run:
         working-directory: ./backend  # 默认工作目录为backend
@@ -136,6 +169,8 @@ jobs:
   wasm:
     name: WASM Build           # 作业名称
     runs-on: ubuntu-latest     # 运行环境
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.wasm == 'true' || needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.ci == 'true' || github.event_name == 'pull_request' }}
     defaults:
       run:
         working-directory: ./backend/media-wasm  # WASM项目目录
@@ -202,7 +237,8 @@ jobs:
   integration:
     name: Integration Tests   # 作业名称
     runs-on: ubuntu-latest    # 运行环境
-    needs: [frontend, backend]  # 依赖前端和后端作业完成
+    needs: [frontend, backend, detect-changes]
+    if: ${{ (needs.frontend.result == 'success' || needs.frontend.result == 'skipped') && (needs.backend.result == 'success' || needs.backend.result == 'skipped') }}
     
     # 集成测试需要的服务
     services:
@@ -266,8 +302,8 @@ jobs:
   docker:
     name: Build Docker Images     # 作业名称
     runs-on: ubuntu-latest        # 运行环境
-    needs: [frontend, backend, wasm]  # 依赖前端、后端、WASM作业完成
-    if: github.ref == 'refs/heads/main'  # 仅在main分支执行
+    needs: [frontend, backend, wasm, detect-changes]
+    if: ${{ github.ref == 'refs/heads/main' && ((needs.frontend.result == 'success' || needs.frontend.result == 'skipped') && (needs.backend.result == 'success' || needs.backend.result == 'skipped') && (needs.wasm.result == 'success' || needs.wasm.result == 'skipped')) }}
     
     steps:
     - name: Checkout code
@@ -332,8 +368,8 @@ jobs:
   deploy:
     name: Deploy to Production       # 作业名称
     runs-on: ubuntu-latest           # 运行环境
-    needs: [integration, docker]     # 依赖集成测试和Docker构建完成
-    if: github.ref == 'refs/heads/main'  # 仅在main分支执行
+    needs: [integration, docker]
+    if: ${{ github.ref == 'refs/heads/main' && needs.integration.result == 'success' && (needs.docker.result == 'success' || needs.docker.result == 'skipped') }}
     environment: production          # 指定部署环境，可以设置保护规则
     
     steps:
@@ -394,6 +430,7 @@ jobs:
           mv .env.tmp .env
           chmod 600 .env
         
+          ls -ld /opt/media-hub/frontend/nginx.conf
           docker compose pull
           docker compose up -d --remove-orphans
           docker system prune -f
