@@ -139,7 +139,7 @@ jobs:
   wasm:
     name: WASM Build           # 作业名称
     runs-on: ubuntu-latest     # 运行环境
-    if: ${{ !contains(github.event.head_commit.message, '[skip-wasm]') && !contains(github.event.head_commit.message, '[skip-backend]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[skip-wasm]') }}
     defaults:
       run:
         working-directory: ./backend/media-wasm  # WASM项目目录
