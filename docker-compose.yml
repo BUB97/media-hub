@@ -41,9 +41,7 @@ services:
 
   # 后端服务
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    image: media-hub/backend:latest
     container_name: media-hub-backend
     restart: unless-stopped
     environment:
@@ -75,9 +73,7 @@ services:
 
   # 前端服务
   frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
+    image: media-hub/frontend:latest
     container_name: media-hub-frontend
     restart: unless-stopped
     ports:
