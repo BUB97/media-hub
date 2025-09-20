@@ -273,7 +273,7 @@ jobs:
     name: Build Docker Images     # 作业名称
     runs-on: ubuntu-latest        # 运行环境
     needs: [frontend, backend, wasm]
-    if: ${{ github.ref == 'refs/heads/main' && ((needs.frontend.result == 'success' || needs.backend.result == 'success' || needs.wasm.result == 'success')  && !contains(github.event.head_commit.message, '[skip-docker]') }}
+    if: ${{ github.ref == 'refs/heads/main' && (needs.frontend.result == 'success' || needs.backend.result == 'success' || needs.wasm.result == 'success')  && !contains(github.event.head_commit.message, '[skip-docker]') }}
     
     steps:
     - name: Checkout code
