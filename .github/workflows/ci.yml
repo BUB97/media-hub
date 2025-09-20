@@ -375,7 +375,6 @@ jobs:
           mv .env.tmp .env
           chmod 600 .env
         
-          # 优化Docker拉取命令，添加重试机制和超时设置
-          docker compose pull --timeout 300 || docker compose pull --timeout 300 || docker compose pull --timeout 300
+          docker compose pull
           docker compose up -d --remove-orphans
           docker system prune -f
