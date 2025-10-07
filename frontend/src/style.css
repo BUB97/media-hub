@@ -139,6 +139,11 @@ a:hover {
   box-shadow: var(--shadow-md);
 }
 
+/* 品牌渐变背景（组件兜底，不依赖 Tailwind） */
+.brand-gradient-bg {
+  background: var(--gradient-primary);
+}
+
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);

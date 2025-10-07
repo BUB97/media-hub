@@ -10,7 +10,7 @@
         <!-- 头部 -->
         <div class="text-center">
           <div
-            class="mx-auto h-16 w-16 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center mb-4 animate-pulse"
+            class="mx-auto h-16 w-16 brand-gradient-bg rounded-2xl flex items-center justify-center mb-4"
           >
             <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
