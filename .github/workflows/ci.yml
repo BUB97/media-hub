@@ -432,7 +432,7 @@ jobs:
           mv .env.tmp .env
           chmod 600 .env
         
-          ls -ld /opt/media-hub/nginx.conf
+          cat /opt/media-hub/nginx.conf
           docker compose pull
           docker compose up -d --remove-orphans
           # 重新加载nginx配置，确保更新的nginx.conf生效
