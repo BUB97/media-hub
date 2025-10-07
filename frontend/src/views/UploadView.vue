@@ -378,7 +378,7 @@
 
 <style scoped>
   .upload-container {
-    max-width: 800px;
+    max-width: 50rem;
     margin: 0 auto;
     padding: 2rem;
   }
@@ -399,8 +399,8 @@
   }
 
   .file-selector {
-    border: 2px dashed #bdc3c7;
-    border-radius: 12px;
+    border: 0.125rem dashed #bdc3c7;
+    border-radius: 0.75rem;
     padding: 2rem;
     text-align: center;
     transition: all 0.3s ease;
@@ -434,7 +434,7 @@
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     cursor: pointer;
     font-size: 1rem;
     margin-top: 1rem;
@@ -451,7 +451,7 @@
     justify-content: space-between;
     background: #f8f9fa;
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 0.5rem;
   }
 
   .file-info {
@@ -492,9 +492,9 @@
 
   .progress-bar {
     width: 100%;
-    height: 8px;
+    height: 0.5rem;
     background: #ecf0f1;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     overflow: hidden;
     margin-bottom: 0.5rem;
   }
@@ -552,7 +552,7 @@
 
   .status-message {
     padding: 1rem;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     margin-bottom: 1.5rem;
     text-align: center;
   }
@@ -560,25 +560,25 @@
   .status-message.success {
     background: #d4edda;
     color: #155724;
-    border: 1px solid #c3e6cb;
+    border: 0.0625rem solid #c3e6cb;
   }
 
   .status-message.error {
     background: #f8d7da;
     color: #721c24;
-    border: 1px solid #f5c6cb;
+    border: 0.0625rem solid #f5c6cb;
   }
 
   .status-message.info {
     background: #d1ecf1;
     color: #0c5460;
-    border: 1px solid #bee5eb;
+    border: 0.0625rem solid #bee5eb;
   }
 
   .cos-config {
     background: #f8f9fa;
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     margin-top: 2rem;
   }
 
@@ -589,7 +589,7 @@
 
   .config-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(15.625rem, 1fr));
     gap: 1rem;
   }
 
@@ -597,7 +597,7 @@
     display: flex;
     justify-content: space-between;
     padding: 0.5rem 0;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 0.0625rem solid #dee2e6;
   }
 
   .config-item label {
