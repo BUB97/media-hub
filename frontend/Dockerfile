@@ -22,14 +22,13 @@ FROM nginx:alpine
 # 安装 curl 用于健康检查
 RUN apk add --no-cache curl
 
-# 复制自定义 Nginx 配置
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# 复制前端容器的 server 级 Nginx 配置
+COPY frontend/docker-nginx.conf /etc/nginx/conf.d/default.conf
 
 # 从构建阶段复制构建产物
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# 复制项目的 Nginx 配置（如果存在）
-COPY nginx-media-hub.conf /etc/nginx/conf.d/media-hub.conf
+# 不复制主机用的 nginx-media-hub.conf，避免与容器内配置冲突
 
 # 暴露端口
 EXPOSE 80

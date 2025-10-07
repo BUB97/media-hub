@@ -383,7 +383,7 @@ jobs:
         host: ${{ secrets.DEPLOY_HOST }}
         username: ${{ secrets.DEPLOY_USER }}
         key: ${{ secrets.DEPLOY_KEY }}
-        source: "frontend/nginx.conf"
+        source: "nginx.conf"
         target: "/opt/media-hub/"
         strip_components: 1  # 剥离1层路径（去掉frontend/）
         overwrite: true
