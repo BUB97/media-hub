@@ -141,7 +141,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { authAPI, authUtils } from '../api';
 
 interface Props {
@@ -158,7 +157,6 @@ const props = withDefaults(defineProps<Props>(), {
     currentPage: ''
 });
 
-const router = useRouter();
 const isMobileMenuOpen = ref(false);
 
 // 计算导航链接的样式类
@@ -180,7 +178,7 @@ const handleLogout = async () => {
         console.error('登出失败:', error);
         authUtils.clearAuthData();
     }
-    router.push('/login');
+    getApp().goTo({ path: '/login' });
     isMobileMenuOpen.value = false;
 };
 </script>

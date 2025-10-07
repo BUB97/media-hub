@@ -295,11 +295,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { mediaAPI, type Media } from '../api';
 import AppNavbar from '../components/AppNavbar.vue';
 
-const router = useRouter();
 const route = useRoute();
 
 // 状态管理
@@ -446,7 +445,7 @@ const handleDelete = async () => {
   
     try {
         await mediaAPI.deleteMedia(media.value.id);
-        router.push('/media');
+        getApp().goTo({ path: '/media' });
     } catch (err: any) {
         console.error('删除媒体失败:', err);
         alert('删除媒体失败，请稍后重试');
