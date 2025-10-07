@@ -132,13 +132,7 @@
               </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">暂无媒体文件</h3>
-            <p class="text-gray-600 mb-8">开始添加一些媒体文件到您的库中，让您的创作之旅开始吧！</p>
-            <button
-              @click="$router.push('/upload')"
-              class="bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              添加第一个媒体文件
-            </button>
+            <p class="text-gray-600">开始添加一些媒体文件到您的库中，让您的创作之旅开始吧！</p>
           </div>
         </div>
 

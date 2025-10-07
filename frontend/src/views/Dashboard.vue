@@ -134,7 +134,7 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <router-link
                 to="/media"
-                class="relative group bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl border-2 border-blue-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                class="relative flex flex-col items-center text-center group bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl border-2 border-blue-200 hover:border-blue-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
               >
                 <div>
                   <span class="rounded-2xl inline-flex p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
@@ -154,9 +154,9 @@
                 </div>
               </router-link>
 
-              <button
-                @click="showUploadModal = true"
-                class="relative group bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl border-2 border-green-200 hover:border-green-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+              <router-link
+                to="/upload"
+                class="relative flex flex-col items-center text-center group bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl border-2 border-green-200 hover:border-green-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
               >
                 <div>
                   <span class="rounded-2xl inline-flex p-4 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
@@ -173,11 +173,11 @@
                     添加新的媒体文件到您的库中
                   </p>
                 </div>
-              </button>
+              </router-link>
 
               <router-link
                 to="/profile"
-                class="relative group bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl border-2 border-purple-200 hover:border-purple-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                class="relative flex flex-col items-center text-center group bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl border-2 border-purple-200 hover:border-purple-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
               >
                 <div>
                   <span class="rounded-2xl inline-flex p-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg">
